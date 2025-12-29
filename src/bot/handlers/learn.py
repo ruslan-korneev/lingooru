@@ -14,6 +14,7 @@ from src.bot.keyboards.learn import (
 from src.bot.utils.flags import get_flag
 from src.core.exceptions import ConflictError
 from src.db.session import AsyncSessionMaker
+from src.modules.srs.services import SRSService
 from src.modules.users.dto import UserReadDTO
 from src.modules.users.models import LanguagePair
 from src.modules.vocabulary.models import Language
@@ -203,10 +204,15 @@ async def on_learn_action(
 
     # Handle action
     if action == "know":
-        # Mark as learned
+        # Mark as learned and create Review for SM-2 tracking
         async with AsyncSessionMaker() as session:
-            service = VocabularyService(session)
-            await service.mark_word_learned(current_word["id"])
+            vocab_service = VocabularyService(session)
+            await vocab_service.mark_word_learned(current_word["id"])
+
+            # Create Review entry for spaced repetition
+            srs_service = SRSService(session)
+            await srs_service.get_or_create_review(current_word["id"])
+
             await session.commit()
     # hard, forgot, skip - just move to next
 

@@ -7,6 +7,7 @@ from sqlalchemy import text
 from src.bot.webhook import router as telegram_router
 from src.core.dependencies.containers import Container
 from src.db.session import AsyncSessionMaker
+from src.modules.srs import router as srs_router
 from src.modules.users import router as users_router
 
 __all__ = ("router", "v1_router")
@@ -16,6 +17,7 @@ v1_router = APIRouter(prefix="/v1")
 
 # Register module routers
 v1_router.include_router(users_router)
+v1_router.include_router(srs_router)
 v1_router.include_router(telegram_router)
 
 

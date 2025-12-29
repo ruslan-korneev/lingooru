@@ -117,3 +117,37 @@ btn-mix = 혼합
 
 # Misc
 coming-soon = 🚧 곧 출시 예정!
+
+# Review (SM-2)
+review-start = 🔄 복습
+
+    📊 오늘 복습할 단어: { $count }개
+
+review-no-words-due = ✅ 훌륭해요! 오늘 복습할 단어가 없습니다.
+    나중에 다시 오거나 새 단어를 학습하세요!
+
+review-question = 🔄 복습 ({ $position }/{ $total })
+
+    번역하세요:
+
+    { $translation }
+
+review-answer = 🔄 복습 ({ $position }/{ $total })
+
+    🔊 { $word }{ $phonetic }{ $example }
+
+    얼마나 잘 기억하셨나요?
+
+review-complete = ✅ 복습 완료!
+
+    📊 결과:
+    • 복습한 단어: { $count }개
+    • 평균 평점: { $avg_rating }
+    • 시간: { $time }분
+
+review-session-ended = 세션 종료!
+
+# Review buttons
+btn-begin-review = ▶️ 복습 시작
+btn-show-answer = 👀 정답 보기
+btn-review-again = 🔄 다시

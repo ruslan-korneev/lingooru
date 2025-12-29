@@ -117,3 +117,37 @@ btn-mix = Mix
 
 # Misc
 coming-soon = 🚧 Coming soon!
+
+# Review (SM-2)
+review-start = 🔄 Review
+
+    📊 Words due today: { $count }
+
+review-no-words-due = ✅ Great! No reviews due today.
+    Come back later or learn new words!
+
+review-question = 🔄 Review ({ $position }/{ $total })
+
+    Translate:
+
+    { $translation }
+
+review-answer = 🔄 Review ({ $position }/{ $total })
+
+    🔊 { $word }{ $phonetic }{ $example }
+
+    How well did you remember?
+
+review-complete = ✅ Review complete!
+
+    📊 Results:
+    • Reviewed: { $count } words
+    • Average rating: { $avg_rating }
+    • Time: { $time } min
+
+review-session-ended = Session ended!
+
+# Review buttons
+btn-begin-review = ▶️ Begin Review
+btn-show-answer = 👀 Show Answer
+btn-review-again = 🔄 Again

@@ -17,6 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_e
 
 from src.config import settings
 from src.core.asgi import get_app
+from src.modules.srs.repositories import ReviewLogRepository, ReviewRepository
+from src.modules.srs.services import SRSService
 from src.modules.users.dto import UserCreateDTO, UserReadDTO
 from src.modules.users.repositories import UserRepository
 from src.modules.users.services import UserService
@@ -267,3 +269,21 @@ async def sample_word_with_translation(
     translation = await translation_repository.save(trans_dto)
     await session.flush()
     return word, translation
+
+
+# Module fixtures - SRS
+
+
+@pytest.fixture
+def review_repository(session: AsyncSession) -> ReviewRepository:
+    return ReviewRepository(session)
+
+
+@pytest.fixture
+def review_log_repository(session: AsyncSession) -> ReviewLogRepository:
+    return ReviewLogRepository(session)
+
+
+@pytest.fixture
+def srs_service(session: AsyncSession) -> SRSService:
+    return SRSService(session)

@@ -7,6 +7,7 @@ from aiogram_i18n.cores.fluent_runtime_core import FluentRuntimeCore
 from src.bot.handlers import (
     learn_router,
     menu_router,
+    review_router,
     start_router,
     vocabulary_router,
     word_lists_router,
@@ -29,6 +30,7 @@ def create_dispatcher() -> Dispatcher:
     # Include routers (order matters - more specific first)
     dp.include_router(start_router)
     dp.include_router(learn_router)
+    dp.include_router(review_router)
     dp.include_router(word_lists_router)
     dp.include_router(vocabulary_router)  # Has general text handler, should be last before menu
     dp.include_router(menu_router)

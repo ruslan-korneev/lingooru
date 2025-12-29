@@ -19,6 +19,11 @@ from src.modules.vocabulary.word_lists import get_word_lists_by_language
 
 router = Router(name="menu")
 
+# Menu button texts to ignore as word input
+MENU_BUTTONS: set[str] = {"📋 Меню", "📋 Menu", "📋 메뉴"}
+LEARN_BUTTONS: set[str] = {"📚 Учить", "📚 Learn", "📚 배우기"}
+REVIEW_BUTTONS: set[str] = {"🔄 Повторять", "🔄 Review", "🔄 복습"}
+
 # Language pair display names
 PAIR_DISPLAY = {
     "en_ru": "EN → RU",
@@ -192,12 +197,12 @@ async def on_add_words(
     await callback.answer()
 
 
-@router.callback_query(F.data.in_({"review:start", "stats:show"}))
+@router.callback_query(F.data == "stats:show")
 async def on_coming_soon(
     callback: CallbackQuery,
     i18n: I18nContext,
     db_user: UserReadDTO,
 ) -> None:
-    # Placeholder for future functionality (Phase 2+)
+    # Placeholder for future functionality (Phase 5)
     logger.debug(f"{__name__}:user:{db_user.username}")
     await callback.answer(text=i18n.get("coming-soon"), show_alert=True)

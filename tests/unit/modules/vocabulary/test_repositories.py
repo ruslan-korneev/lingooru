@@ -460,7 +460,7 @@ class TestUserWordRepository:
             source_language=Language.EN,
             limit=10,
         )
-        assert len(en_result) == 3
+        assert len(en_result) == 3  # noqa: PLR2004
         assert all(item.word.language == Language.EN for item in en_result)
 
         # Test filter by Korean
@@ -470,7 +470,7 @@ class TestUserWordRepository:
             source_language=Language.KO,
             limit=10,
         )
-        assert len(ko_result) == 2
+        assert len(ko_result) == 2  # noqa: PLR2004
         assert all(item.word.language == Language.KO for item in ko_result)
 
         # Test no filter (all languages)
@@ -479,7 +479,7 @@ class TestUserWordRepository:
             target_language=Language.RU,
             limit=10,
         )
-        assert len(all_result) == 5
+        assert len(all_result) == 5  # noqa: PLR2004
 
     async def test_count_unlearned_by_source_language(
         self,
@@ -539,8 +539,8 @@ class TestUserWordRepository:
 
         counts = await user_word_repository.count_unlearned_by_source_language(sample_user.id)
 
-        assert counts[Language.EN] == 2  # 3 - 1 learned
-        assert counts[Language.KO] == 2
+        assert counts[Language.EN] == 2  # noqa: PLR2004 - 3 - 1 learned
+        assert counts[Language.KO] == 2  # noqa: PLR2004
 
     async def test_count_unlearned_for_language(
         self,
@@ -737,8 +737,8 @@ class TestUserWordRepository:
             limit=10,
             offset=0,
         )
-        assert len(en_result.items) == 3
-        assert en_result.total == 3
+        assert len(en_result.items) == 3  # noqa: PLR2004
+        assert en_result.total == 3  # noqa: PLR2004
         assert all(item.word.language == Language.EN for item in en_result.items)
 
         # Test filter by Korean
@@ -749,8 +749,8 @@ class TestUserWordRepository:
             limit=10,
             offset=0,
         )
-        assert len(ko_result.items) == 2
-        assert ko_result.total == 2
+        assert len(ko_result.items) == 2  # noqa: PLR2004
+        assert ko_result.total == 2  # noqa: PLR2004
         assert all(item.word.language == Language.KO for item in ko_result.items)
 
         # Test no filter (all languages)
@@ -760,5 +760,5 @@ class TestUserWordRepository:
             limit=10,
             offset=0,
         )
-        assert len(all_result.items) == 5
-        assert all_result.total == 5
+        assert len(all_result.items) == 5  # noqa: PLR2004
+        assert all_result.total == 5  # noqa: PLR2004
