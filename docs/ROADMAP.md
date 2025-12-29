@@ -171,14 +171,14 @@ src/bot/
 Базовая настройка Telegram-бота и интеграция с существующим FastAPI backend.
 
 ### Задачи
-- [ ] Добавить `aiogram>=3.0` в зависимости
-- [ ] Создать структуру `src/bot/` (см. секцию UX)
-- [ ] Настроить webhook endpoint `/v1/telegram/webhook`
-- [ ] Реализовать `/start` с выбором языка UI
-- [ ] Настроить Reply Keyboard для главных действий
-- [ ] Создать модуль `src/modules/users/`
-- [ ] Настроить i18n middleware (aiogram-i18n или fluent)
-- [ ] Создать файлы локализации `src/bot/locales/{ru,en,ko}.yaml`
+- [x] Добавить `aiogram>=3.0` в зависимости
+- [x] Создать структуру `src/bot/` (см. секцию UX)
+- [x] Настроить webhook endpoint `/v1/telegram/webhook`
+- [x] Реализовать `/start` с выбором языка UI
+- [x] Настроить Reply Keyboard для главных действий
+- [x] Создать модуль `src/modules/users/`
+- [x] Настроить i18n middleware (aiogram-i18n или fluent)
+- [x] Создать файлы локализации `src/bot/locales/{ru,en,ko}.yaml`
 
 ### Модель данных
 

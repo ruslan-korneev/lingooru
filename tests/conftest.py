@@ -17,6 +17,9 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_e
 
 from src.config import settings
 from src.core.asgi import get_app
+from src.modules.users.dto import UserCreateDTO, UserReadDTO
+from src.modules.users.repositories import UserRepository
+from src.modules.users.services import UserService
 from tests.mimic.session import FakeSessionMaker
 
 if TYPE_CHECKING:
@@ -154,8 +157,38 @@ async def api_client(test_app: "FastAPIWrapper") -> AsyncGenerator[AsyncClient]:
     test_app.container.db_session_maker.reset_override()
 
 
-# Module fixtures - add your module-specific fixtures here
-# Example:
-# @pytest.fixture
-# def user_repository(session: AsyncSession) -> UserRepository:
-#     return UserRepository(session)
+# Module fixtures - Users
+
+
+@pytest.fixture
+def user_repository(session: AsyncSession) -> UserRepository:
+    return UserRepository(session)
+
+
+@pytest.fixture
+def user_service(session: AsyncSession) -> UserService:
+    return UserService(session)
+
+
+@pytest_asyncio.fixture
+async def sample_user(session: AsyncSession, user_service: UserService) -> UserReadDTO:
+    dto = UserCreateDTO(
+        telegram_id=123456789,
+        username="testuser",
+        first_name="Test User",
+    )
+    user, _ = await user_service.get_or_create(dto)
+    await session.flush()
+    return user
+
+
+@pytest_asyncio.fixture
+async def second_sample_user(session: AsyncSession, user_service: UserService) -> UserReadDTO:
+    dto = UserCreateDTO(
+        telegram_id=987654321,
+        username="seconduser",
+        first_name="Second User",
+    )
+    user, _ = await user_service.get_or_create(dto)
+    await session.flush()
+    return user

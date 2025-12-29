@@ -50,6 +50,12 @@ class RateLimitSettings(BaseModel):
     burst_size: int = 10
 
 
+class TelegramSettings(BaseModel):
+    bot_token: SecretStr = SecretStr("")
+    webhook_url: str = ""
+    webhook_secret: SecretStr = SecretStr("")
+
+
 class Config(BaseSettings):
     root_dir: Path = Path(__file__).parent.parent.resolve()
     logging_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
@@ -62,6 +68,7 @@ class Config(BaseSettings):
     sentry: SentrySettings = SentrySettings()
     cors: CORSSettings = CORSSettings()
     rate_limit: RateLimitSettings = RateLimitSettings()
+    telegram: TelegramSettings = TelegramSettings()
 
     model_config = SettingsConfigDict(
         env_file=f"{root_dir}/.env",

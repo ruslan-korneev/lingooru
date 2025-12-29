@@ -25,6 +25,9 @@ db:
 test:
 	uv run pytest
 
+bot:
+	uv run python scripts/run_bot.py
+
 test-build:
 	docker build -t tmp .
 	docker rmi tmp:latest

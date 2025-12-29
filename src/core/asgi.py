@@ -1,8 +1,11 @@
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from loguru import logger
 from sentry_sdk import init as sentry_init
 from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
@@ -19,6 +22,40 @@ from src.core.middleware import InMemoryRateLimiter, RateLimitMiddleware, Reques
 
 class FastAPIWrapper(FastAPI):
     container: Container
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
+    """Application lifespan handler for bot webhook setup/teardown."""
+    # Startup
+    if settings.telegram.bot_token.get_secret_value():
+        from src.bot.dispatcher import get_bot
+
+        bot = get_bot()
+
+        if settings.telegram.webhook_url:
+            webhook_url = f"{settings.telegram.webhook_url}/v1/telegram/webhook"
+            secret = settings.telegram.webhook_secret.get_secret_value()
+
+            await bot.set_webhook(
+                url=webhook_url,
+                secret_token=secret if secret else None,
+            )
+            logger.info(f"Telegram webhook set to {webhook_url}")
+
+    yield
+
+    # Shutdown
+    if settings.telegram.bot_token.get_secret_value():
+        from src.bot.dispatcher import get_bot
+
+        bot = get_bot()
+
+        if settings.telegram.webhook_url:
+            await bot.delete_webhook()
+            logger.info("Telegram webhook deleted")
+
+        await bot.session.close()
 
 
 def _get_request_id(request: Request) -> str | None:
@@ -104,6 +141,7 @@ def get_app() -> FastAPIWrapper:
         title=settings.project_title,
         description=settings.project_description,
         version="2.0.0",
+        lifespan=lifespan,
     )
     app.container = container
 
