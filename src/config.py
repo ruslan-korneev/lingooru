@@ -56,6 +56,13 @@ class TelegramSettings(BaseModel):
     webhook_secret: SecretStr = SecretStr("")
 
 
+class OpenAISettings(BaseModel):
+    api_key: SecretStr = SecretStr("")
+    whisper_model: str = "whisper-1"
+    gpt_model: str = "gpt-4o"
+    timeout_seconds: int = 30
+
+
 class Config(BaseSettings):
     root_dir: Path = Path(__file__).parent.parent.resolve()
     logging_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
@@ -69,6 +76,7 @@ class Config(BaseSettings):
     cors: CORSSettings = CORSSettings()
     rate_limit: RateLimitSettings = RateLimitSettings()
     telegram: TelegramSettings = TelegramSettings()
+    openai: OpenAISettings = OpenAISettings()
 
     model_config = SettingsConfigDict(
         env_file=f"{root_dir}/.env",

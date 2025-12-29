@@ -10,6 +10,7 @@ from src.bot.handlers import (
     review_router,
     start_router,
     vocabulary_router,
+    voice_router,
     word_lists_router,
 )
 from src.bot.middleware.i18n import UserLocaleManager
@@ -32,6 +33,7 @@ def create_dispatcher() -> Dispatcher:
     dp.include_router(learn_router)
     dp.include_router(review_router)
     dp.include_router(word_lists_router)
+    dp.include_router(voice_router)  # Voice handler before vocabulary
     dp.include_router(vocabulary_router)  # Has general text handler, should be last before menu
     dp.include_router(menu_router)
 

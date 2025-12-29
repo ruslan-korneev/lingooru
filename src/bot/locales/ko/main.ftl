@@ -151,3 +151,43 @@ review-session-ended = 세션 종료!
 btn-begin-review = ▶️ 복습 시작
 btn-show-answer = 👀 정답 보기
 btn-review-again = 🔄 다시
+
+# Voice/Pronunciation
+btn-pronunciation = 🎤 발음
+
+voice-no-words = 🎤 발음 연습을 위한 학습 완료된 단어가 없습니다.
+    먼저 단어를 학습하세요!
+
+voice-prompt = 🎤 발음 ({ $position }/{ $total })
+
+    발음하세요:
+    🔊 { $word }{ $phonetic }
+
+    💡 음성 메시지를 보내세요
+
+voice-processing = ⏳ 처리 중...
+
+voice-result = 🎤 결과
+
+    당신이 말한 것: "{ $transcribed }"
+    올바른 발음: { $expected }
+
+    { $rating } { $rating_num }/5
+
+    💡 { $feedback }
+
+voice-complete = ✅ 연습 완료!
+
+    📊 결과:
+    • 단어: { $count }개
+    • 평균 평점: { $avg_rating }
+    • 시간: { $time }분
+
+voice-error = ❌ 음성 메시지 처리 실패. 다시 시도해 주세요.
+
+voice-session-ended = 연습 종료!
+
+# Voice buttons
+btn-voice-retry = 🔄 다시
+btn-voice-next = ➡️ 다음
+btn-voice-again = 🎤 다시

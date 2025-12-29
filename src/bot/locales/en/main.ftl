@@ -151,3 +151,43 @@ review-session-ended = Session ended!
 btn-begin-review = ▶️ Begin Review
 btn-show-answer = 👀 Show Answer
 btn-review-again = 🔄 Again
+
+# Voice/Pronunciation
+btn-pronunciation = 🎤 Pronunciation
+
+voice-no-words = 🎤 You don't have any learned words for pronunciation practice yet.
+    Learn some words first!
+
+voice-prompt = 🎤 Pronunciation ({ $position }/{ $total })
+
+    Pronounce:
+    🔊 { $word }{ $phonetic }
+
+    💡 Send a voice message
+
+voice-processing = ⏳ Processing...
+
+voice-result = 🎤 Result
+
+    You said: "{ $transcribed }"
+    Expected: { $expected }
+
+    { $rating } { $rating_num }/5
+
+    💡 { $feedback }
+
+voice-complete = ✅ Practice complete!
+
+    📊 Results:
+    • Words: { $count }
+    • Average rating: { $avg_rating }
+    • Time: { $time } min
+
+voice-error = ❌ Failed to process voice message. Please try again.
+
+voice-session-ended = Practice ended!
+
+# Voice buttons
+btn-voice-retry = 🔄 Retry
+btn-voice-next = ➡️ Next
+btn-voice-again = 🎤 Again
