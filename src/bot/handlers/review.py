@@ -72,14 +72,16 @@ async def on_review_start(
         due_count = await service.count_due_reviews(db_user.id)
 
     if due_count == 0:
-        await _safe_edit_or_send(message,
+        await _safe_edit_or_send(
+            message,
             text=i18n.get("review-no-words-due"),
             reply_markup=get_review_complete_keyboard(i18n),
         )
         await callback.answer()
         return
 
-    await _safe_edit_or_send(message,
+    await _safe_edit_or_send(
+        message,
         text=i18n.get("review-start", count=due_count),
         reply_markup=get_review_start_keyboard(i18n),
     )
@@ -112,7 +114,8 @@ async def on_review_begin(
         )
 
     if not reviews:
-        await _safe_edit_or_send(message,
+        await _safe_edit_or_send(
+            message,
             text=i18n.get("review-no-words-due"),
             reply_markup=get_review_complete_keyboard(i18n),
         )
@@ -130,7 +133,8 @@ async def on_review_begin(
 
     # Show first question (translation prompt)
     review = reviews[0]
-    await _safe_edit_or_send(message,
+    await _safe_edit_or_send(
+        message,
         text=i18n.get(
             "review-question",
             position=1,
@@ -173,7 +177,8 @@ async def on_review_show_answer(
     example_text = f'\n\n"{review_data["example_sentence"]}"' if review_data.get("example_sentence") else ""
     word_id = UUID(review_data["word_id"]) if review_data.get("word_id") else None
 
-    await _safe_edit_or_send(message,
+    await _safe_edit_or_send(
+        message,
         text=i18n.get(
             "review-answer",
             position=current_index + 1,
@@ -240,7 +245,8 @@ async def on_review_rate(
         # Calculate time in minutes
         time_minutes = max(1, stats.time_spent_seconds // 60)
 
-        await _safe_edit_or_send(message,
+        await _safe_edit_or_send(
+            message,
             text=i18n.get(
                 "review-complete",
                 count=stats.total_reviewed,
@@ -257,7 +263,8 @@ async def on_review_rate(
     await state.set_state(ReviewStates.reviewing)
 
     next_review = reviews[next_index]
-    await _safe_edit_or_send(message,
+    await _safe_edit_or_send(
+        message,
         text=i18n.get(
             "review-question",
             position=next_index + 1,

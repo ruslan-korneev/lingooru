@@ -87,9 +87,7 @@ class TestAudioService:
             patch.object(audio_service, "_s3") as mock_s3,
         ):
             mock_gtts.generate = AsyncMock(return_value=b"audio data")
-            mock_s3.upload_audio = AsyncMock(
-                return_value="https://s3.example.com/words/123.mp3"
-            )
+            mock_s3.upload_audio = AsyncMock(return_value="https://s3.example.com/words/123.mp3")
 
             result = await audio_service.get_audio_url(sample_word.id)
 

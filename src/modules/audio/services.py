@@ -105,11 +105,7 @@ class AudioService:
         audio_source: str,
     ) -> None:
         """Update word with audio URL and source."""
-        query = (
-            update(Word)
-            .where(Word.id == word_id)
-            .values(audio_url=audio_url, audio_source=audio_source)
-        )
+        query = update(Word).where(Word.id == word_id).values(audio_url=audio_url, audio_source=audio_source)
         await self._session.execute(query)
         await self._session.flush()
 

@@ -22,9 +22,7 @@ class TestGTTSClient:
         with patch("src.modules.audio.clients.gtts_client.gTTS") as mock_gtts:
             mock_instance = MagicMock()
             mock_gtts.return_value = mock_instance
-            mock_instance.write_to_fp = MagicMock(
-                side_effect=lambda fp: fp.write(b"fake audio data")
-            )
+            mock_instance.write_to_fp = MagicMock(side_effect=lambda fp: fp.write(b"fake audio data"))
 
             result = await gtts_client.generate("hello", "en")
 
@@ -37,9 +35,7 @@ class TestGTTSClient:
         with patch("src.modules.audio.clients.gtts_client.gTTS") as mock_gtts:
             mock_instance = MagicMock()
             mock_gtts.return_value = mock_instance
-            mock_instance.write_to_fp = MagicMock(
-                side_effect=lambda fp: fp.write(b"korean audio")
-            )
+            mock_instance.write_to_fp = MagicMock(side_effect=lambda fp: fp.write(b"korean audio"))
 
             result = await gtts_client.generate("안녕", "ko")
 
@@ -47,16 +43,12 @@ class TestGTTSClient:
             assert result == b"korean audio"
 
     @pytest.mark.asyncio
-    async def test_generate_unsupported_language_defaults_to_english(
-        self, gtts_client: GTTSClient
-    ) -> None:
+    async def test_generate_unsupported_language_defaults_to_english(self, gtts_client: GTTSClient) -> None:
         """Test that unsupported language falls back to English."""
         with patch("src.modules.audio.clients.gtts_client.gTTS") as mock_gtts:
             mock_instance = MagicMock()
             mock_gtts.return_value = mock_instance
-            mock_instance.write_to_fp = MagicMock(
-                side_effect=lambda fp: fp.write(b"audio")
-            )
+            mock_instance.write_to_fp = MagicMock(side_effect=lambda fp: fp.write(b"audio"))
 
             await gtts_client.generate("test", "unknown")
 

@@ -1,330 +1,211 @@
 # Lingooru
 
 [![CI](https://github.com/ruslan-korneev/lingooru/actions/workflows/ci.yml/badge.svg)](https://github.com/ruslan-korneev/lingooru/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/ruslan-korneev/lingooru/graph/badge.svg)](https://codecov.io/gh/ruslan-korneev/lingooru)
+[![codecov](https://codecov.io/gh/ruslan-korneev/lingooru/graph/badge.svg?token=j2IsTFTXxu)](https://codecov.io/gh/ruslan-korneev/lingooru)
 
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![aiogram 3.x](https://img.shields.io/badge/aiogram-3.x-blue.svg)](https://aiogram.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![mypy](https://img.shields.io/badge/mypy-strict-blue.svg)](http://mypy-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Lingooru API Documentation
+Telegram bot for language learning with spaced repetition, voice practice, and AI-powered feedback.
 
 ## Features
 
-- **FastAPI** with async support
-- **SQLAlchemy 2.0** with async sessions and PostgreSQL
-- **Alembic** for database migrations
-- **Pydantic v2** for data validation
-- **Dependency Injector** for IoC/DI container
-- **Sentry** for error tracking
-- **Loguru** for structured logging with request ID tracking
-- **Comprehensive testing** with pytest, coverage requirements
-- **Code quality** with ruff, mypy (strict mode)
+### Learning
+- **Vocabulary Management** - Add words manually or from curated word lists
+- **Spaced Repetition (SM-2)** - Anki-like algorithm for optimal memorization
+- **Multi-language Support** - English and Korean learning with Russian interface
 
-### Production-Ready Features
+### Practice
+- **Voice Pronunciation** - Record voice messages, get AI feedback via OpenAI Whisper
+- **Audio Playback** - Listen to word pronunciations (gTTS with S3/MinIO caching)
+- **Review Sessions** - Track progress with quality ratings
 
-- **API Versioning** - URL prefix versioning (`/v1/...`)
-- **Rate Limiting** - In-memory token bucket algorithm with configurable limits
-- **Request ID Tracking** - UUID per request, logged and returned in headers
-- **Global Exception Handling** - Consistent error response format
-- **Configurable CORS** - Environment-based CORS configuration
-- **Pagination** - Offset-based pagination with metadata
+### Technical
+- **aiogram 3.x** - Modern async Telegram bot framework
+- **FastAPI** - REST API with async support
+- **SQLAlchemy 2.0** - Async ORM with PostgreSQL
+- **i18n** - Localized interface (Russian, English, Korean)
 
 ## Prerequisites
 
 - Python 3.13+
 - [uv](https://docs.astral.sh/uv/) package manager
 - PostgreSQL 17+
+- Docker (for MinIO)
 
 ## Quick Start
 
+### 1. Setup Environment
+
 ```bash
+# Clone and enter project
 cd lingooru
 
-# Activate virtual environment
-source .venv/bin/activate
+# Create and activate virtual environment
+uv venv && source .venv/bin/activate
+uv sync --all-groups
 ```
 
-Configure database:
+### 2. Configure
 
 ```bash
-# Edit .env with your database credentials
+# Copy example config
+cp .env.example .env
+
+# Edit with your credentials
 $EDITOR .env
 ```
 
-Run database migrations:
+Required settings:
+```env
+# Database
+DB__HOST=localhost
+DB__PORT=5432
+DB__NAME=lingooru
+DB__USERNAME=postgres
+DB__PASSWORD=postgres
+
+# Telegram
+telegram__bot_token=YOUR_BOT_TOKEN
+
+# OpenAI (for voice recognition)
+openai__api_key=YOUR_OPENAI_KEY
+
+# S3/MinIO (for audio caching)
+S3__ENDPOINT_URL=http://localhost:9000
+S3__ACCESS_KEY=minioadmin
+S3__SECRET_KEY=minioadmin
+S3__BUCKET_NAME=lingooru-audio
+```
+
+### 3. Start Services
+
+```bash
+# Start MinIO for audio storage
+docker run -d \
+  --name minio \
+  -p 9000:9000 \
+  -p 9001:9001 \
+  -v ~/minio/data:/data \
+  -e MINIO_ROOT_USER=minioadmin \
+  -e MINIO_ROOT_PASSWORD=minioadmin \
+  minio/minio server /data --console-address ":9001"
+
+# Create bucket
+docker exec minio mc alias set local http://localhost:9000 minioadmin minioadmin
+docker exec minio mc mb local/lingooru-audio --ignore-existing
+docker exec minio mc anonymous set download local/lingooru-audio
+```
+
+### 4. Run Migrations
 
 ```bash
 uv run alembic upgrade head
 ```
 
-### Start API Server
+### 5. Start Bot
 
 ```bash
+# Run Telegram bot
+make bot
+
+# Or run API server
 uv run uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-Access API documentation at http://localhost:8000/docs
+## Bot Commands
 
-## API Endpoints
+The bot uses inline keyboards for navigation. Main features:
 
-All endpoints are prefixed with `/v1/`:
+| Button | Description |
+|--------|-------------|
+| 📚 Учить | Learn new words |
+| 🔄 Повторять | Review due words (spaced repetition) |
+| 🎤 Произношение | Practice pronunciation with voice |
+| 📋 Меню | Main menu with stats |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/v1/health` | Health check with DB connectivity |
-| GET | `/v1/users` | List users (paginated) |
-| POST | `/v1/users` | Create user |
-| GET | `/v1/users/{id}` | Get user by ID |
-| PATCH | `/v1/users/{id}` | Update user |
-| DELETE | `/v1/users/{id}` | Delete user |
+### Learning Flow
 
-### Pagination
-
-List endpoints return paginated responses:
-
-```json
-{
-  "items": [...],
-  "total": 100,
-  "limit": 20,
-  "offset": 0,
-  "has_more": true
-}
-```
-
-Query parameters: `?limit=20&offset=0`
-
-### Response Headers
-
-All responses include:
-- `X-Request-ID` - Unique request identifier
-- `X-RateLimit-Limit` - Rate limit ceiling
-- `X-RateLimit-Remaining` - Remaining requests
-
-### Error Response Format
-
-```json
-{
-  "error": "NotFoundError",
-  "detail": "Resource not found",
-  "request_id": "550e8400-e29b-41d4-a716-446655440000"
-}
-```
+1. **Add Words** - From word lists or manually
+2. **Learn** - See word, translation, example; rate as Know/Hard/Forgot
+3. **Review** - Spaced repetition based on SM-2 algorithm
+4. **Voice Practice** - Record pronunciation, get AI feedback
 
 ## Development
 
 ### Code Quality
 
 ```bash
-make fmt      # Format code with ruff
-make lint     # Run linting with ruff and mypy
-make test     # Run test suite with pytest
-make db       # Validate database migrations
-make          # Run all checks (fmt, lint, db, test)
+make              # Run all checks (fmt, lint, db, test)
+make fmt          # Format code with ruff
+make lint         # Lint with ruff and mypy (strict)
+make test         # Run pytest with coverage
+make db           # Validate migrations
 ```
 
 ### Project Structure
 
 ```
 src/
-├── core/                  # Application core
-│   ├── api/               # Router aggregation with versioning
-│   ├── dependencies/      # DI setup (containers, db, http)
-│   ├── exceptions.py      # Custom exception classes
-│   ├── middleware/        # Request ID, Rate limiting
-│   └── types/             # Base types (DTO, Repository, Pagination)
-├── db/                    # Database configuration
-│   ├── base.py            # SQLAlchemy base model
-│   └── session.py         # Async session factory
-├── modules/               # Feature modules
-│   └── users/             # Example CRUD module
-│       ├── models.py      # SQLAlchemy model
-│       ├── dto.py         # Pydantic DTOs
-│       ├── repositories.py # Data access layer
-│       ├── services.py    # Business logic
-│       └── routers.py     # API endpoints
-└── config.py              # Application settings
+├── bot/                    # Telegram bot
+│   ├── handlers/           # Message & callback handlers
+│   ├── keyboards/          # Inline & reply keyboards
+│   ├── locales/            # i18n translations (ru, en, ko)
+│   └── middleware/         # User loading, i18n
+├── modules/
+│   ├── audio/              # TTS generation & S3 storage
+│   ├── srs/                # Spaced repetition (SM-2)
+│   ├── users/              # User management
+│   ├── vocabulary/         # Words, translations, user dictionary
+│   └── voice/              # Voice transcription & feedback
+├── core/                   # API core (routes, middleware, DI)
+├── db/                     # Database config & sessions
+└── config.py               # Application settings
 
 tests/
-├── conftest.py            # Common fixtures
-├── mimic/                 # Test doubles (stubs, fakes, mocks)
-├── benchmark/             # Performance tests
-├── integration/           # API endpoint and database tests
-└── unit/                  # Unit tests
-    └── modules/
-        └── users/         # User module tests
+├── unit/                   # Unit tests
+├── integration/            # API & database tests
+└── conftest.py             # Shared fixtures
 ```
 
-## Architecture Patterns
+### Adding Features
 
-### Repository Pattern
-
-Base repository (`src/core/types/repositories.py`) provides generic CRUD operations:
-
-```python
-class UserRepository(BaseRepository[User, UserCreateDTO, UserReadDTO]):
-    _model = User
-    _create_dto = UserCreateDTO
-    _read_dto = UserReadDTO
-
-    # Inherited methods: get_all(), get_paginated(), save(), save_bulk()
-```
-
-### Service Layer
-
-Business logic is separated from data access:
-
-```python
-class UserService:
-    def __init__(self, session: AsyncSession) -> None:
-        self._repository = UserRepository(session)
-
-    async def get_users_paginated(
-        self, limit: int = 20, offset: int = 0
-    ) -> PaginatedResponse[UserReadDTO]:
-        result = await self._repository.get_paginated(limit=limit, offset=offset)
-        return PaginatedResponse.create(
-            items=list(result.items),
-            total=result.total,
-            limit=limit,
-            offset=offset,
-        )
-```
-
-### Custom Exceptions
-
-Use custom exceptions for consistent error handling:
-
-```python
-from src.core.exceptions import NotFoundError, ConflictError
-
-# In service layer
-if user is None:
-    raise NotFoundError("User not found")
-
-# Automatically returns:
-# {"error": "NotFoundError", "detail": "User not found", "request_id": "..."}
-```
-
-### Dependency Injection
-
-Using `dependency-injector` for managing application dependencies:
-
-```python
-class Container(DeclarativeContainer):
-    wiring_config = WiringConfiguration(packages=["src"])
-    db_session_maker = providers.Factory(AsyncSessionMaker)
-```
-
-## Adding a New Module
-
-1. Create module directory: `src/modules/<name>/`
-
-2. Add model in `models.py`:
-```python
-class MyModel(SAModel):
-    __tablename__ = "my_models"
-    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    # ... fields
-```
-
-3. Define DTOs in `dto.py`:
-```python
-class MyModelCreateDTO(BaseDTO):
-    # input fields
-
-class MyModelReadDTO(BaseDTO):
-    # output fields
-```
-
-4. Create repository in `repositories.py`:
-```python
-class MyModelRepository(BaseRepository[MyModel, MyModelCreateDTO, MyModelReadDTO]):
-    _model = MyModel
-    _create_dto = MyModelCreateDTO
-    _read_dto = MyModelReadDTO
-```
-
-5. Add service layer in `services.py`
-
-6. Define routes in `routers.py`
-
-7. Register router in `src/core/api/routers.py`:
-```python
-from src.modules.my_module import router as my_router
-v1_router.include_router(my_router)  # Note: register on v1_router
-```
-
-8. Create migration:
-```bash
-uv run alembic revision --autogenerate -m "add_my_model_table"
-```
-
-9. Add tests:
-   - Unit tests in `tests/unit/modules/<name>/`
-   - Integration tests in `tests/integration/`
-
-## Configuration
-
-Environment variables are loaded from `.env` file. See `.env.example` for available options.
-
-### Key Settings
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DB__HOST` | PostgreSQL host | localhost |
-| `DB__PORT` | PostgreSQL port | 5432 |
-| `DB__NAME` | Database name | postgres |
-| `DB__USERNAME` | Database user | postgres |
-| `DB__PASSWORD` | Database password | postgres |
-| `SENTRY__DSN` | Sentry DSN (optional) | - |
-| `LOGGING_LEVEL` | Log level | INFO |
-| `CORS__ALLOW_ORIGINS` | Allowed CORS origins | ["*"] |
-| `CORS__ALLOW_CREDENTIALS` | Allow credentials | true |
-| `CORS__MAX_AGE` | Preflight cache time | 600 |
-| `RATE_LIMIT__ENABLED` | Enable rate limiting | true |
-| `RATE_LIMIT__REQUESTS_PER_MINUTE` | Rate limit | 60 |
-| `RATE_LIMIT__BURST_SIZE` | Burst allowance | 10 |
+See [CLAUDE.md](CLAUDE.md) for detailed development guidelines.
 
 ## Testing
-
-Tests use transaction rollback for isolation - each test runs in its own transaction that gets rolled back.
 
 ```bash
 # Run all tests
 make test
 
 # Run by category
-uv run pytest -k unit -v           # Unit tests only
-uv run pytest -k integration -v    # Integration tests only
-uv run pytest -k "not benchmark"   # Exclude benchmarks
+uv run pytest -k unit -v
+uv run pytest -k integration -v
 
-# Run specific test file
-uv run pytest tests/unit/modules/users/test_services.py -v
-
-# Run tests matching pattern
-uv run pytest -k "test_create" -v
-
-# Run with coverage report
-uv run pytest --cov-report=html
+# Run specific module
+uv run pytest tests/unit/modules/audio/ -v
 ```
 
 Coverage requirements: 80% line, 70% branch.
 
-## Docker
+## Configuration
 
-Build and run with Docker:
-
-```bash
-docker build -t lingooru .
-docker run -p 8000:8000 --env-file .env lingooru
-```
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB__*` | PostgreSQL connection | localhost:5432 |
+| `telegram__bot_token` | Telegram bot token | - |
+| `openai__api_key` | OpenAI API key | - |
+| `S3__ENDPOINT_URL` | MinIO/S3 endpoint | http://localhost:9000 |
+| `S3__ACCESS_KEY` | S3 access key | - |
+| `S3__SECRET_KEY` | S3 secret key | - |
+| `S3__BUCKET_NAME` | Audio bucket name | lingooru-audio |
+| `LOGGING_LEVEL` | Log level | INFO |
 
 ## License
 
 MIT
-

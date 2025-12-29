@@ -157,7 +157,7 @@ ignore_missing_imports = true
 python_files = "tests_*.py test_*.py"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-addopts = "--cov-report json --cov-report xml --cov-report term-missing:skip-covered --cov-branch  --cov=src --no-cov-on-fail --ignore=private/"
+addopts = "-n auto --cov-report json --cov-report xml --cov-report term-missing:skip-covered --cov-branch  --cov=src --no-cov-on-fail --ignore=private/"
 filterwarnings = [
     "ignore::DeprecationWarning:pytest_freezegun.*:",
     "ignore::DeprecationWarning:pytest_asyncio.*:",
