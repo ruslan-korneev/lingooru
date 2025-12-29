@@ -9,9 +9,10 @@ from aiogram import F, Router
 if TYPE_CHECKING:
     from io import BytesIO
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
 from aiogram_i18n import I18nContext
 from loguru import logger
 
@@ -29,6 +30,23 @@ from src.modules.vocabulary.models import Language
 from src.modules.voice.services import VoiceService
 
 router = Router(name="voice")
+
+
+async def _safe_edit_or_send(
+    message: Message,
+    text: str,
+    reply_markup: InlineKeyboardMarkup | None = None,
+    parse_mode: str | None = None,
+) -> None:
+    """Edit message text, or delete and send new if message is audio."""
+    try:
+        await message.edit_text(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
+    except TelegramBadRequest as e:
+        if "no text in the message" in str(e):
+            await message.delete()
+            await message.answer(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
+        else:
+            raise
 
 
 class VoiceStates(StatesGroup):
@@ -67,7 +85,8 @@ async def on_voice_start(
         )
 
     if not words:
-        await message.edit_text(
+        await _safe_edit_or_send(
+            message,
             text=i18n.get("voice-no-words"),
             reply_markup=get_voice_no_words_keyboard(i18n),
         )
@@ -111,7 +130,8 @@ async def _show_word_prompt(
         phonetic=phonetic_text,
     )
 
-    await message.edit_text(
+    await _safe_edit_or_send(
+        message,
         text=text,
         reply_markup=get_voice_prompt_keyboard(i18n, word_id=word_id),
         parse_mode=ParseMode.HTML,
@@ -280,7 +300,8 @@ async def on_voice_next(
             time_minutes = max(1, stats.time_spent_seconds // 60)
 
             await state.clear()
-            await message.edit_text(
+            await _safe_edit_or_send(
+                message,
                 text=i18n.get(
                     "voice-complete",
                     count=stats.total_practiced,
@@ -291,7 +312,8 @@ async def on_voice_next(
             )
         else:
             await state.clear()
-            await message.edit_text(
+            await _safe_edit_or_send(
+                message,
                 text=i18n.get("voice-session-ended"),
                 reply_markup=get_voice_complete_keyboard(i18n),
             )

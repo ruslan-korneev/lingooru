@@ -53,7 +53,7 @@ def get_review_rating_keyboard(
         builder.row(
             InlineKeyboardButton(
                 text=i18n.get("btn-play-audio"),
-                callback_data=f"audio:play:{word_id}",
+                callback_data=f"audio:play:review:{word_id}",
             )
         )
 

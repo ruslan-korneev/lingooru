@@ -2,9 +2,10 @@ from uuid import UUID
 
 from aiogram import F, Router
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
 from aiogram_i18n import I18nContext
 
 from src.bot.keyboards.learn import (
@@ -23,6 +24,23 @@ from src.modules.vocabulary.models import Language
 from src.modules.vocabulary.services import VocabularyService
 
 router = Router(name="learn")
+
+
+async def _safe_edit_or_send(
+    message: Message,
+    text: str,
+    reply_markup: InlineKeyboardMarkup | None = None,
+    parse_mode: str | None = None,
+) -> None:
+    """Edit message text, or delete and send new if message is audio."""
+    try:
+        await message.edit_text(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
+    except TelegramBadRequest as e:
+        if "no text in the message" in str(e):
+            await message.delete()
+            await message.answer(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
+        else:
+            raise
 
 
 class LearnStates(StatesGroup):
@@ -63,7 +81,8 @@ async def on_learn_start(
 
     if unlearned_count == 0:
         # No words for current language pair - redirect to add words
-        await message.edit_text(
+        await _safe_edit_or_send(
+            message,
             text=i18n.get("learn-no-words-for-pair"),
             reply_markup=get_word_not_found_keyboard(i18n),
         )
@@ -135,7 +154,8 @@ async def _start_learning_session(
         )
 
     if not words:
-        await message.edit_text(
+        await _safe_edit_or_send(
+            message,
             text=i18n.get("learn-no-words"),
             reply_markup=get_word_not_found_keyboard(i18n),
         )
@@ -166,7 +186,8 @@ async def _start_learning_session(
         example=example_text,
     )
 
-    await message.edit_text(
+    await _safe_edit_or_send(
+        message,
         text=text,
         reply_markup=get_learning_card_keyboard(i18n, word_id=word.word.id),
         parse_mode=ParseMode.HTML,
@@ -224,7 +245,8 @@ async def on_learn_action(
     if next_index >= len(words):
         # Session complete
         await state.clear()
-        await message.edit_text(
+        await _safe_edit_or_send(
+            message,
             text=i18n.get("learn-session-complete", count=len(words)),
             reply_markup=get_learning_complete_keyboard(i18n),
         )
@@ -253,7 +275,8 @@ async def on_learn_action(
 
     word_id = UUID(word_data["id"])
 
-    await message.edit_text(
+    await _safe_edit_or_send(
+        message,
         text=text,
         reply_markup=get_learning_card_keyboard(i18n, word_id=word_id),
         parse_mode=ParseMode.HTML,
@@ -275,7 +298,8 @@ async def on_word_add_prompt(
     if not isinstance(message, Message):
         return
 
-    await message.edit_text(
+    await _safe_edit_or_send(
+        message,
         text=i18n.get("word-add-prompt"),
     )
     await callback.answer()

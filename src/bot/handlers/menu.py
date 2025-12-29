@@ -1,5 +1,6 @@
 from aiogram import F, Router
-from aiogram.types import CallbackQuery, Message
+from aiogram.exceptions import TelegramBadRequest
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
 from aiogram_i18n import I18nContext
 from loguru import logger
 
@@ -18,6 +19,24 @@ from src.modules.vocabulary.services import VocabularyService
 from src.modules.vocabulary.word_lists import get_word_lists_by_language
 
 router = Router(name="menu")
+
+
+async def _safe_edit_or_send(
+    message: Message,
+    text: str,
+    reply_markup: InlineKeyboardMarkup | None = None,
+    parse_mode: str | None = None,
+) -> None:
+    """Edit message text, or delete and send new if message is audio."""
+    try:
+        await message.edit_text(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
+    except TelegramBadRequest as e:
+        if "no text in the message" in str(e):
+            await message.delete()
+            await message.answer(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
+        else:
+            raise
+
 
 # Menu button texts to ignore as word input
 MENU_BUTTONS: set[str] = {"📋 Меню", "📋 Menu", "📋 메뉴"}
@@ -46,7 +65,8 @@ async def on_main_menu(
         return
 
     text = await _build_menu_text(i18n, db_user)
-    await message.edit_text(
+    await _safe_edit_or_send(
+        message,
         text=text,
         reply_markup=get_main_menu_keyboard(i18n),
     )
@@ -113,7 +133,8 @@ async def on_settings(
         f"{i18n.get('settings-lang', lang=lang_name)}\n"
         f"{i18n.get('settings-pair', pair=pair_name)}"
     )
-    await message.edit_text(
+    await _safe_edit_or_send(
+        message,
         text=text,
         reply_markup=get_settings_keyboard(i18n),
     )
@@ -134,7 +155,8 @@ async def on_change_language(
     if not isinstance(message, Message):
         return
 
-    await message.edit_text(
+    await _safe_edit_or_send(
+        message,
         text=i18n.get("welcome-choose-lang"),
         reply_markup=get_language_selection_keyboard(),
     )
@@ -155,7 +177,8 @@ async def on_change_pair(
     if not isinstance(message, Message):
         return
 
-    await message.edit_text(
+    await _safe_edit_or_send(
+        message,
         text=i18n.get("welcome-choose-pair"),
         reply_markup=get_pair_selection_keyboard(i18n),
     )
@@ -183,14 +206,16 @@ async def on_add_words(
     ui_lang = db_user.ui_language.value
 
     if not word_lists:
-        await message.edit_text(
+        await _safe_edit_or_send(
+            message,
             text=i18n.get("lists-empty"),
             reply_markup=get_main_menu_keyboard(i18n),
         )
         await callback.answer()
         return
 
-    await message.edit_text(
+    await _safe_edit_or_send(
+        message,
         text=i18n.get("lists-title"),
         reply_markup=get_word_lists_keyboard(i18n, word_lists, ui_lang),
     )

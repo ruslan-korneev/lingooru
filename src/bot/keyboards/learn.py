@@ -59,7 +59,7 @@ def get_learning_card_keyboard(
         builder.row(
             InlineKeyboardButton(
                 text=i18n.get("btn-play-audio"),
-                callback_data=f"audio:play:{word_id}",
+                callback_data=f"audio:play:learn:{word_id}",
             )
         )
 
