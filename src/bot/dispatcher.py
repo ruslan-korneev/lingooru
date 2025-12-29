@@ -5,6 +5,7 @@ from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores.fluent_runtime_core import FluentRuntimeCore
 
 from src.bot.handlers import (
+    audio_router,
     learn_router,
     menu_router,
     review_router,
@@ -30,6 +31,7 @@ def create_dispatcher() -> Dispatcher:
 
     # Include routers (order matters - more specific first)
     dp.include_router(start_router)
+    dp.include_router(audio_router)  # Audio handler for playing pronunciations
     dp.include_router(learn_router)
     dp.include_router(review_router)
     dp.include_router(word_lists_router)

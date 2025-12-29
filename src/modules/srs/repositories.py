@@ -53,6 +53,7 @@ class ReviewRepository(BaseRepository[Review, ReviewCreateDTO, ReviewReadDTO]):
             select(
                 self._model.id,
                 self._model.user_word_id,
+                Word.id.label("word_id"),
                 Word.text.label("word_text"),
                 Word.phonetic.label("word_phonetic"),
                 Translation.translated_text.label("translation"),

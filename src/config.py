@@ -63,6 +63,15 @@ class OpenAISettings(BaseModel):
     timeout_seconds: int = 30
 
 
+class S3Settings(BaseModel):
+    endpoint_url: str = "http://localhost:9000"
+    access_key: SecretStr = SecretStr("")
+    secret_key: SecretStr = SecretStr("")
+    bucket_name: str = "lingooru-audio"
+    region: str = "us-east-1"
+    public_url_base: str = ""
+
+
 class Config(BaseSettings):
     root_dir: Path = Path(__file__).parent.parent.resolve()
     logging_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
@@ -77,6 +86,7 @@ class Config(BaseSettings):
     rate_limit: RateLimitSettings = RateLimitSettings()
     telegram: TelegramSettings = TelegramSettings()
     openai: OpenAISettings = OpenAISettings()
+    s3: S3Settings = S3Settings()
 
     model_config = SettingsConfigDict(
         env_file=f"{root_dir}/.env",

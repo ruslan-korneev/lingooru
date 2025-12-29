@@ -23,6 +23,8 @@ dependencies = [
     "aiogram (>=3.17.0,<4.0.0)",
     "aiogram-i18n (>=1.4.0,<2.0.0)",
     "fluent.runtime (>=0.4.0,<1.0.0)",
+    "gtts (>=2.5.0,<3.0.0)",
+    "aioboto3 (>=13.0.0,<14.0.0)",
 ]
 
 [dependency-groups]
@@ -46,6 +48,7 @@ dev = [
     "pytest-httpx (>=0.35.0,<0.36.0)",
     "wemake-python-styleguide (>=1.0.0,<2.0.0)",
     "pre-commit>=4.2.0",
+    "types-aioboto3[s3] (>=13.0.0,<14.0.0)",
 ]
 plugins = [
     "click>=8.1",
@@ -144,6 +147,10 @@ strict_equality = true
 
 [[tool.mypy.overrides]]
 module = ["asyncpg", "asyncpg.exceptions"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["gtts", "aioboto3"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

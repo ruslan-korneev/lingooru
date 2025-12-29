@@ -1,5 +1,7 @@
 """Review keyboards for spaced repetition sessions."""
 
+from uuid import UUID
+
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram_i18n import I18nContext
@@ -39,9 +41,21 @@ def get_review_show_answer_keyboard(i18n: I18nContext) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def get_review_rating_keyboard(i18n: I18nContext) -> InlineKeyboardMarkup:
+def get_review_rating_keyboard(
+    i18n: I18nContext,
+    word_id: UUID | None = None,
+) -> InlineKeyboardMarkup:
     """Keyboard with quality rating buttons 1-5."""
     builder = InlineKeyboardBuilder()
+
+    # Add audio button if word_id provided
+    if word_id:
+        builder.row(
+            InlineKeyboardButton(
+                text=i18n.get("btn-play-audio"),
+                callback_data=f"audio:play:{word_id}",
+            )
+        )
 
     builder.row(
         InlineKeyboardButton(text="1️⃣", callback_data="review:rate:1"),

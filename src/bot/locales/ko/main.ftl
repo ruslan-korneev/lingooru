@@ -115,6 +115,12 @@ list-already-added = 이 목록은 이미 추가되었습니다.
 # Language selection
 btn-mix = 혼합
 
+# Audio
+btn-play-audio = 🔊 듣기
+audio-loading = ⏳ 오디오 로딩 중...
+audio-not-available = ❌ 이 단어의 오디오를 사용할 수 없습니다
+audio-error = ❌ 재생 오류
+
 # Misc
 coming-soon = 🚧 곧 출시 예정!
 

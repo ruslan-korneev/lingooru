@@ -1,6 +1,7 @@
 """Review handler for spaced repetition sessions."""
 
 from datetime import UTC, datetime
+from uuid import UUID
 
 from aiogram import F, Router
 from aiogram.enums import ParseMode
@@ -152,6 +153,7 @@ async def on_review_show_answer(
     # Build answer text
     phonetic_text = f"\n{review_data['word_phonetic']}" if review_data.get("word_phonetic") else ""
     example_text = f'\n\n"{review_data["example_sentence"]}"' if review_data.get("example_sentence") else ""
+    word_id = UUID(review_data["word_id"]) if review_data.get("word_id") else None
 
     await message.edit_text(
         text=i18n.get(
@@ -162,7 +164,7 @@ async def on_review_show_answer(
             phonetic=phonetic_text,
             example=example_text,
         ),
-        reply_markup=get_review_rating_keyboard(i18n),
+        reply_markup=get_review_rating_keyboard(i18n, word_id=word_id),
         parse_mode=ParseMode.HTML,
     )
     await callback.answer()

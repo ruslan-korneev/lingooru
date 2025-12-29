@@ -60,6 +60,7 @@ class ReviewWithWordDTO(BaseDTO):
 
     id: UUID
     user_word_id: UUID
+    word_id: UUID
     word_text: str
     word_phonetic: str | None
     translation: str

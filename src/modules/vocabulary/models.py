@@ -31,6 +31,7 @@ class Word(SAModel):
     language: Mapped[Language] = mapped_column(index=True)
     phonetic: Mapped[str | None] = mapped_column(String(100), nullable=True)
     audio_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    audio_source: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
 

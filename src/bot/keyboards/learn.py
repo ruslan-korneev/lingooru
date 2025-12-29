@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram_i18n import I18nContext
@@ -45,9 +47,21 @@ def get_language_selection_keyboard(
     return builder.as_markup()
 
 
-def get_learning_card_keyboard(i18n: I18nContext) -> InlineKeyboardMarkup:
+def get_learning_card_keyboard(
+    i18n: I18nContext,
+    word_id: UUID | None = None,
+) -> InlineKeyboardMarkup:
     """Keyboard for learning card with Know/Hard/Forgot buttons."""
     builder = InlineKeyboardBuilder()
+
+    # Add audio button if word_id provided
+    if word_id:
+        builder.row(
+            InlineKeyboardButton(
+                text=i18n.get("btn-play-audio"),
+                callback_data=f"audio:play:{word_id}",
+            )
+        )
 
     builder.row(
         InlineKeyboardButton(text=i18n.get("btn-know"), callback_data="learn:know"),

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from aiogram import F, Router
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
@@ -166,7 +168,7 @@ async def _start_learning_session(
 
     await message.edit_text(
         text=text,
-        reply_markup=get_learning_card_keyboard(i18n),
+        reply_markup=get_learning_card_keyboard(i18n, word_id=word.word.id),
         parse_mode=ParseMode.HTML,
     )
 
@@ -249,9 +251,11 @@ async def on_learn_action(
         example=example_text,
     )
 
+    word_id = UUID(word_data["id"])
+
     await message.edit_text(
         text=text,
-        reply_markup=get_learning_card_keyboard(i18n),
+        reply_markup=get_learning_card_keyboard(i18n, word_id=word_id),
         parse_mode=ParseMode.HTML,
     )
     await callback.answer()

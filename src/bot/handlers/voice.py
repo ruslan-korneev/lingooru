@@ -85,7 +85,7 @@ async def on_voice_start(
 
     # Show first word
     word = words[0]
-    await _show_word_prompt(message, i18n, word.text, word.phonetic, word.language, 1, len(words))
+    await _show_word_prompt(message, i18n, word.text, word.phonetic, word.language, 1, len(words), word_id=word.id)
     await callback.answer()
 
 
@@ -97,6 +97,7 @@ async def _show_word_prompt(
     language: str,
     position: int,
     total: int,
+    word_id: UUID | None = None,
 ) -> None:
     """Show word pronunciation prompt."""
     flag = get_flag(Language(language))
@@ -112,7 +113,7 @@ async def _show_word_prompt(
 
     await message.edit_text(
         text=text,
-        reply_markup=get_voice_prompt_keyboard(i18n),
+        reply_markup=get_voice_prompt_keyboard(i18n, word_id=word_id),
         parse_mode=ParseMode.HTML,
     )
 
@@ -237,6 +238,7 @@ async def on_voice_retry(
         current_word["language"],
         current_index + 1,
         len(words),
+        word_id=UUID(current_word["id"]),
     )
     await callback.answer()
 
@@ -310,5 +312,6 @@ async def on_voice_next(
         next_word["language"],
         next_index + 1,
         len(words),
+        word_id=UUID(next_word["id"]),
     )
     await callback.answer()

@@ -115,6 +115,12 @@ list-already-added = This list has already been added.
 # Language selection
 btn-mix = Mix
 
+# Audio
+btn-play-audio = 🔊 Listen
+audio-loading = ⏳ Loading audio...
+audio-not-available = ❌ Audio not available for this word
+audio-error = ❌ Playback error
+
 # Misc
 coming-soon = 🚧 Coming soon!
 

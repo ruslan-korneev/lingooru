@@ -13,6 +13,7 @@ class WordCreateDTO(BaseDTO):
     language: Language
     phonetic: str | None = None
     audio_url: str | None = None
+    audio_source: str | None = None
 
 
 class WordReadDTO(BaseDTO):
@@ -21,6 +22,7 @@ class WordReadDTO(BaseDTO):
     language: Language
     phonetic: str | None
     audio_url: str | None
+    audio_source: str | None
     created_at: datetime
 
 
