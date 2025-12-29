@@ -15,7 +15,8 @@ pair-ko-ru = 🇰🇷 Korean → 🇷🇺 Russian
 # Main menu
 menu-title = 🎓 Lingooru
 menu-subtitle = Your language learning assistant
-menu-stats = 📊 Learned: { $words } words
+menu-stats = 📊 Learned: { $learned } of { $total } words
+menu-stats-by-lang = { $flag }: { $learned }/{ $total }
 menu-streak = 🔥 Streak: { $days } days
 
 # Buttons
@@ -27,12 +28,92 @@ btn-menu = 📋 Menu
 btn-lang = 🌐 Language
 btn-pair = 📖 Pair
 btn-back = ⬅️ Back
+btn-add-words-menu = ➕ Add Words
 
 # Settings
 settings-title = ⚙️ Settings
 settings-lang = 🌐 Interface language: { $lang }
 settings-pair = 📖 Learning: { $pair }
 settings-saved = ✅ Settings saved!
+
+# Learning
+learn-no-words = 📚 Your vocabulary is empty.
+    Add words by sending them as text, or choose from ready-made lists!
+
+learn-no-words-for-pair = 📚 You don't have any words to learn for your current language pair.
+    Add words by sending them as text, or choose from ready-made lists!
+
+learn-choose-lang = 📚 Choose a language to learn:
+
+learn-card = 📚 Learning ({ $position }/{ $total })
+
+    🔊 { $word }{ $phonetic }
+
+    <tg-spoiler>{ $translation }</tg-spoiler>{ $example }
+
+learn-session-complete = ✅ Session complete!
+    You learned { $count } words.
+
+learn-session-ended = Session ended!
+
+# Words
+word-added = ✅ Word added!
+
+    🔊 { $word }{ $phonetic }
+
+    { $translation }
+
+word-already-exists = ⚠️ This word is already in your vocabulary.
+
+word-not-found-enter-translation = 📝 Word "{ $word }" not found in dictionary.
+    Enter the translation manually:
+
+word-add-prompt = 📝 Send a word you want to add:
+
+word-add-error = ❌ Failed to add word. Please try again.
+
+word-removed = ✅ Word removed from vocabulary.
+
+# Vocabulary
+vocab-title = 📖 My Vocabulary ({ $total } words)
+
+vocab-empty = 📖 Your vocabulary is empty.
+    Add your first word by sending it as text!
+
+# Word lists
+lists-title = 📋 Choose a thematic list:
+
+lists-empty = 📋 No word lists available for this language yet.
+
+list-preview-words = Words in list: { $count }
+
+list-and-more = and { $count } more...
+
+list-not-found = List not found.
+
+list-added = ✅ List "{ $list_name }" added!
+
+    Words added: { $added }
+    Skipped (already exists): { $skipped }
+
+# Additional buttons
+btn-know = ✅ Know
+btn-hard = 🤔 Hard
+btn-forgot = ❌ Forgot
+btn-skip = ⏭️ Skip
+btn-add-more = ➕ More
+btn-add-words = ➕ Add
+btn-word-lists = 📋 Lists
+btn-my-vocab = 📖 Vocab
+btn-learn-again = 🔄 Again
+btn-add-list = ➕ Add list
+btn-more-lists = 📋 Other lists
+btn-list-added = ✅ Added
+
+list-already-added = This list has already been added.
+
+# Language selection
+btn-mix = Mix
 
 # Misc
 coming-soon = 🚧 Coming soon!

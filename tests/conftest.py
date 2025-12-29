@@ -20,6 +20,19 @@ from src.core.asgi import get_app
 from src.modules.users.dto import UserCreateDTO, UserReadDTO
 from src.modules.users.repositories import UserRepository
 from src.modules.users.services import UserService
+from src.modules.vocabulary.dto import (
+    TranslationCreateDTO,
+    TranslationReadDTO,
+    WordCreateDTO,
+    WordReadDTO,
+)
+from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.repositories import (
+    TranslationRepository,
+    UserWordRepository,
+    WordRepository,
+)
+from src.modules.vocabulary.services import VocabularyService
 from tests.mimic.session import FakeSessionMaker
 
 if TYPE_CHECKING:
@@ -192,3 +205,65 @@ async def second_sample_user(session: AsyncSession, user_service: UserService) -
     user, _ = await user_service.get_or_create(dto)
     await session.flush()
     return user
+
+
+# Module fixtures - Vocabulary
+
+
+@pytest.fixture
+def word_repository(session: AsyncSession) -> WordRepository:
+    return WordRepository(session)
+
+
+@pytest.fixture
+def translation_repository(session: AsyncSession) -> TranslationRepository:
+    return TranslationRepository(session)
+
+
+@pytest.fixture
+def user_word_repository(session: AsyncSession) -> UserWordRepository:
+    return UserWordRepository(session)
+
+
+@pytest.fixture
+def vocabulary_service(session: AsyncSession) -> VocabularyService:
+    return VocabularyService(session)
+
+
+@pytest_asyncio.fixture
+async def sample_word(session: AsyncSession, word_repository: WordRepository) -> WordReadDTO:
+    """Create a sample word fixture."""
+    dto = WordCreateDTO(
+        text="hello",
+        language=Language.EN,
+        phonetic="/həˈloʊ/",  # noqa: RUF001
+        audio_url="https://example.com/hello.mp3",
+    )
+    word = await word_repository.save(dto)
+    await session.flush()
+    return word
+
+
+@pytest_asyncio.fixture
+async def sample_word_with_translation(
+    session: AsyncSession,
+    word_repository: WordRepository,
+    translation_repository: TranslationRepository,
+) -> tuple[WordReadDTO, TranslationReadDTO]:
+    """Create a sample word with translation fixture."""
+    word_dto = WordCreateDTO(
+        text="world",
+        language=Language.EN,
+        phonetic="/wɜːrld/",  # noqa: RUF001
+    )
+    word = await word_repository.save(word_dto)
+
+    trans_dto = TranslationCreateDTO(
+        word_id=word.id,
+        translated_text="мир",
+        target_language=Language.RU,
+        example_sentence="Hello, world!",
+    )
+    translation = await translation_repository.save(trans_dto)
+    await session.flush()
+    return word, translation

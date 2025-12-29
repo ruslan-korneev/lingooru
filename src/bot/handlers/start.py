@@ -3,12 +3,12 @@ from aiogram.filters import CommandStart
 from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
 
+from src.bot.handlers.menu import _build_menu_text
 from src.bot.keyboards.menu import (
     get_language_selection_keyboard,
     get_main_menu_keyboard,
     get_pair_selection_keyboard,
 )
-from src.bot.keyboards.reply import get_main_reply_keyboard
 from src.db.session import AsyncSessionMaker
 from src.modules.users.dto import UserReadDTO, UserUpdateDTO
 from src.modules.users.models import LanguagePair, UILanguage
@@ -28,28 +28,6 @@ async def cmd_start(
     await message.answer(
         text=f"{i18n.get('welcome')}\n\n{i18n.get('welcome-choose-lang')}",
         reply_markup=get_language_selection_keyboard(),
-    )
-
-
-async def show_main_menu(
-    message: Message,
-    i18n: I18nContext,
-    db_user: UserReadDTO,  # noqa: ARG001
-) -> None:
-    text = (
-        f"{i18n.get('menu-title')}\n"
-        f"{i18n.get('menu-subtitle')}\n\n"
-        f"{i18n.get('menu-stats', words=0)}\n"
-        f"{i18n.get('menu-streak', days=0)}"
-    )
-    await message.answer(
-        text=text,
-        reply_markup=get_main_menu_keyboard(i18n),
-    )
-    # Set the reply keyboard
-    await message.answer(
-        text="👇",
-        reply_markup=get_main_reply_keyboard(i18n),
     )
 
 
@@ -112,11 +90,10 @@ async def on_pair_selected(
         )
         await session.commit()
 
-    # Show confirmation
+    # Show main menu directly
+    text = await _build_menu_text(i18n, updated_user)
     await message.edit_text(
-        text=i18n.get("settings-saved"),
+        text=text,
+        reply_markup=get_main_menu_keyboard(i18n),
     )
-
-    # Send main menu as new message
-    await show_main_menu(message, i18n, updated_user)
     await callback.answer()

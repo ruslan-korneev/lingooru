@@ -20,11 +20,7 @@ class UserLocaleManager(BaseManager):
             return db_user.ui_language.value
 
         # Fallback to Telegram user language
-        if (
-            event_from_user
-            and event_from_user.language_code
-            and event_from_user.language_code in ("ru", "en", "ko")
-        ):
+        if event_from_user and event_from_user.language_code and event_from_user.language_code in ("ru", "en", "ko"):
             return event_from_user.language_code
 
         return "ru"
