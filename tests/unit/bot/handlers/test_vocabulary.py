@@ -232,6 +232,108 @@ class TestShowVocabularyPage:
         mock_callback.answer.assert_called_once()
 
 
+class TestShowVocabularyPageFilters:
+    """Tests for show_vocabulary_page with filter handling."""
+
+    async def test_gets_filter_from_state_when_not_provided(
+        self,
+        mock_callback: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+        mock_message: MagicMock,
+    ) -> None:
+        """Handler gets filter from state when source_filter is None."""
+        mock_callback.message = mock_message
+        # State contains a filter value
+        mock_state.get_data = AsyncMock(return_value={"vocab_filter": "en"})
+
+        mock_response = MagicMock()
+        mock_response.items = []
+        mock_response.total = 0
+
+        with patch("src.bot.handlers.vocabulary.AsyncSessionMaker") as mock_session_maker:
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.vocabulary.VocabularyService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.get_user_vocabulary = AsyncMock(return_value=mock_response)
+
+                # Call without source_filter - should read from state
+                await show_vocabulary_page(mock_callback, mock_i18n, db_user, mock_state, page=0)
+
+                # Verify get_data was called to retrieve filter
+                mock_state.get_data.assert_called_once()
+                # Verify vocabulary service was called (with filter from state)
+                mock_service.get_user_vocabulary.assert_called_once()
+
+    async def test_skips_state_filter_when_source_filter_provided(
+        self,
+        mock_callback: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+        mock_message: MagicMock,
+    ) -> None:
+        """Handler skips reading state when source_filter is explicitly provided."""
+        from src.modules.vocabulary.models import Language
+
+        mock_callback.message = mock_message
+        # State contains a different filter value - but should be ignored
+        mock_state.get_data = AsyncMock(return_value={"vocab_filter": "en"})
+
+        mock_response = MagicMock()
+        mock_response.items = []
+        mock_response.total = 0
+
+        with patch("src.bot.handlers.vocabulary.AsyncSessionMaker") as mock_session_maker:
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.vocabulary.VocabularyService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.get_user_vocabulary = AsyncMock(return_value=mock_response)
+
+                # Call with explicit source_filter - should not read from state
+                await show_vocabulary_page(
+                    mock_callback, mock_i18n, db_user, mock_state, page=0, source_filter=Language.KO
+                )
+
+                # Verify get_data was NOT called since we provided source_filter
+                mock_state.get_data.assert_not_called()
+
+    async def test_handles_empty_filter_value_in_state(
+        self,
+        mock_callback: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+        mock_message: MagicMock,
+    ) -> None:
+        """Handler handles empty filter value in state (falsy value)."""
+        mock_callback.message = mock_message
+        # State has no filter value (empty/None)
+        mock_state.get_data = AsyncMock(return_value={"vocab_filter": None})
+
+        mock_response = MagicMock()
+        mock_response.items = []
+        mock_response.total = 0
+
+        with patch("src.bot.handlers.vocabulary.AsyncSessionMaker") as mock_session_maker:
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.vocabulary.VocabularyService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.get_user_vocabulary = AsyncMock(return_value=mock_response)
+
+                await show_vocabulary_page(mock_callback, mock_i18n, db_user, mock_state, page=0)
+
+                mock_state.get_data.assert_called_once()
+                mock_service.get_user_vocabulary.assert_called_once()
+
+
 class TestOnTextInput:
     """Tests for on_text_input handler."""
 
@@ -280,6 +382,21 @@ class TestOnTextInput:
 
         mock_message.answer.assert_not_called()
 
+    async def test_skips_when_text_is_none(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler skips when message.text is None."""
+        mock_state.get_state = AsyncMock(return_value=None)
+        mock_message.text = None
+
+        await on_text_input(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_message.answer.assert_not_called()
+
     async def test_skips_long_text(
         self,
         mock_message: MagicMock,
@@ -294,6 +411,196 @@ class TestOnTextInput:
         await on_text_input(mock_message, mock_i18n, db_user, mock_state)
 
         mock_message.answer.assert_not_called()
+
+    async def test_skips_menu_button_text(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler skips menu button text."""
+        mock_state.get_state = AsyncMock(return_value=None)
+        mock_message.text = "📋 Меню"  # Menu button
+
+        await on_text_input(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_message.answer.assert_not_called()
+
+    async def test_skips_learn_button_text(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler skips learn button text."""
+        mock_state.get_state = AsyncMock(return_value=None)
+        mock_message.text = "📚 Learn"  # Learn button
+
+        await on_text_input(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_message.answer.assert_not_called()
+
+    async def test_skips_review_button_text(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler skips review button text."""
+        mock_state.get_state = AsyncMock(return_value=None)
+        mock_message.text = "🔄 Повторять"  # Review button
+
+        await on_text_input(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_message.answer.assert_not_called()
+
+    async def test_adds_word_when_found_in_dictionary(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler adds word to vocabulary when found in dictionary."""
+        mock_state.get_state = AsyncMock(return_value=None)
+        mock_message.text = "hello"
+
+        # Mock lookup result
+        mock_result = MagicMock()
+        mock_result.text = "hello"
+        mock_result.translation = "привет"
+        mock_result.example_sentence = "Hello, world!"
+        mock_result.phonetic = "/həˈloʊ/"  # noqa: RUF001
+        mock_result.audio_url = "https://example.com/hello.mp3"
+
+        # Mock user word after adding
+        mock_word = MagicMock()
+        mock_word.text = "hello"
+        mock_word.translation = "привет"
+        mock_word.phonetic = "/həˈloʊ/"  # noqa: RUF001
+
+        mock_user_word = MagicMock()
+        mock_user_word.word = mock_word
+
+        with patch("src.bot.handlers.vocabulary.AsyncSessionMaker") as mock_session_maker:
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.vocabulary.VocabularyService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.lookup_word = AsyncMock(return_value=mock_result)
+                mock_service.add_word_with_translation = AsyncMock(return_value=mock_user_word)
+
+                await on_text_input(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_service.lookup_word.assert_called_once()
+        mock_service.add_word_with_translation.assert_called_once()
+        mock_session.commit.assert_called_once()
+        mock_message.answer.assert_called_once()
+        mock_i18n.get.assert_any_call("word-added", word="hello", phonetic="\n/həˈloʊ/", translation="привет")  # noqa: RUF001
+
+    async def test_adds_word_without_phonetic(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler adds word without phonetic transcription."""
+        mock_state.get_state = AsyncMock(return_value=None)
+        mock_message.text = "test"
+
+        mock_result = MagicMock()
+        mock_result.text = "test"
+        mock_result.translation = "тест"
+        mock_result.example_sentence = None
+        mock_result.phonetic = None
+        mock_result.audio_url = None
+
+        mock_word = MagicMock()
+        mock_word.text = "test"
+        mock_word.translation = "тест"
+        mock_word.phonetic = None  # No phonetic
+
+        mock_user_word = MagicMock()
+        mock_user_word.word = mock_word
+
+        with patch("src.bot.handlers.vocabulary.AsyncSessionMaker") as mock_session_maker:
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.vocabulary.VocabularyService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.lookup_word = AsyncMock(return_value=mock_result)
+                mock_service.add_word_with_translation = AsyncMock(return_value=mock_user_word)
+
+                await on_text_input(mock_message, mock_i18n, db_user, mock_state)
+
+        # Phonetic should be empty string when None
+        mock_i18n.get.assert_any_call("word-added", word="test", phonetic="", translation="тест")
+
+    async def test_handles_word_already_exists_conflict(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler handles ConflictError when word already exists."""
+        from src.core.exceptions import ConflictError
+
+        mock_state.get_state = AsyncMock(return_value=None)
+        mock_message.text = "hello"
+
+        mock_result = MagicMock()
+        mock_result.text = "hello"
+        mock_result.translation = "привет"
+        mock_result.example_sentence = None
+        mock_result.phonetic = None
+        mock_result.audio_url = None
+
+        with patch("src.bot.handlers.vocabulary.AsyncSessionMaker") as mock_session_maker:
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.vocabulary.VocabularyService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.lookup_word = AsyncMock(return_value=mock_result)
+                mock_service.add_word_with_translation = AsyncMock(side_effect=ConflictError("Word exists"))
+
+                await on_text_input(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_message.answer.assert_called_once()
+        mock_i18n.get.assert_any_call("word-already-exists")
+
+    async def test_asks_for_translation_when_word_not_found(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler asks for translation when word not found in dictionary."""
+        mock_state.get_state = AsyncMock(return_value=None)
+        mock_message.text = "unknownword"
+
+        with patch("src.bot.handlers.vocabulary.AsyncSessionMaker") as mock_session_maker:
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.vocabulary.VocabularyService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.lookup_word = AsyncMock(return_value=None)  # Word not found
+
+                await on_text_input(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_state.update_data.assert_called_with(pending_word="unknownword")
+        mock_state.set_state.assert_called_once_with(LearnStates.waiting_for_translation)
+        mock_message.answer.assert_called_once()
+        mock_i18n.get.assert_any_call("word-not-found-enter-translation", word="unknownword")
 
 
 class TestOnNoop:

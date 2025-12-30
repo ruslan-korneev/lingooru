@@ -1,11 +1,13 @@
 """Tests for voice handler."""
 
 from datetime import UTC, datetime
+from io import BytesIO
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 from src.bot.handlers.voice import (
     VoiceStates,
+    on_voice_message,
     on_voice_next,
     on_voice_retry,
     on_voice_start,
@@ -309,3 +311,225 @@ class TestOnVoiceNext:
         mock_state.set_state.assert_called_with(VoiceStates.waiting_for_voice)
         mock_show.assert_called_once()
         mock_callback.answer.assert_called_once()
+
+
+class TestOnVoiceMessage:
+    """Tests for on_voice_message handler."""
+
+    async def test_returns_early_when_no_voice(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler returns early when message has no voice."""
+        mock_message.voice = None
+        mock_message.bot = MagicMock()
+
+        await on_voice_message(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_state.get_data.assert_not_called()
+
+    async def test_returns_early_when_no_bot(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler returns early when message has no bot."""
+        mock_message.voice = MagicMock()
+        mock_message.bot = None
+
+        await on_voice_message(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_state.get_data.assert_not_called()
+
+    async def test_clears_state_when_no_words(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler clears state when no words in data."""
+        mock_message.voice = MagicMock()
+        mock_message.bot = MagicMock()
+        mock_state.get_data = AsyncMock(return_value={"words": [], "current_index": 0})
+
+        await on_voice_message(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_state.clear.assert_called_once()
+
+    async def test_clears_state_when_index_out_of_range(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler clears state when current_index >= len(words)."""
+        mock_message.voice = MagicMock()
+        mock_message.bot = MagicMock()
+        words = [{"id": str(uuid4()), "text": "hello"}]
+        mock_state.get_data = AsyncMock(return_value={"words": words, "current_index": 1})
+
+        await on_voice_message(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_state.clear.assert_called_once()
+
+    async def test_handles_missing_file_path(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler handles case when file has no file_path."""
+        mock_voice = MagicMock()
+        mock_voice.file_id = "file123"
+        mock_message.voice = mock_voice
+        mock_message.bot = AsyncMock()
+        mock_message.answer = AsyncMock()
+
+        words = [{"id": str(uuid4()), "text": "hello", "language": "en"}]
+        mock_state.get_data = AsyncMock(return_value={"words": words, "current_index": 0, "log_ids": []})
+
+        mock_file = MagicMock()
+        mock_file.file_path = None
+        mock_message.bot.get_file = AsyncMock(return_value=mock_file)
+
+        processing_msg = AsyncMock()
+        mock_message.answer = AsyncMock(return_value=processing_msg)
+
+        await on_voice_message(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_state.set_state.assert_called_with(VoiceStates.waiting_for_voice)
+        processing_msg.edit_text.assert_called_once()
+
+    async def test_handles_non_bytesio_file_data(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler handles case when file_data is not BytesIO."""
+        mock_voice = MagicMock()
+        mock_voice.file_id = "file123"
+        mock_message.voice = mock_voice
+        mock_message.bot = AsyncMock()
+
+        words = [{"id": str(uuid4()), "text": "hello", "language": "en"}]
+        mock_state.get_data = AsyncMock(return_value={"words": words, "current_index": 0, "log_ids": []})
+
+        mock_file = MagicMock()
+        mock_file.file_path = "/path/to/file.ogg"
+        mock_message.bot.get_file = AsyncMock(return_value=mock_file)
+        # Return something that's not BytesIO
+        mock_message.bot.download_file = AsyncMock(return_value="not a BytesIO")
+
+        processing_msg = AsyncMock()
+        mock_message.answer = AsyncMock(return_value=processing_msg)
+
+        await on_voice_message(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_state.set_state.assert_called_with(VoiceStates.waiting_for_voice)
+        processing_msg.edit_text.assert_called_once()
+
+    async def test_processes_voice_successfully(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler processes voice message successfully."""
+        mock_voice = MagicMock()
+        mock_voice.file_id = "file123"
+        mock_message.voice = mock_voice
+        mock_message.bot = AsyncMock()
+
+        word_id = str(uuid4())
+        words = [{"id": word_id, "text": "hello", "language": "en", "phonetic": "/helo/"}]
+        mock_state.get_data = AsyncMock(return_value={"words": words, "current_index": 0, "log_ids": []})
+
+        mock_file = MagicMock()
+        mock_file.file_path = "/path/to/file.ogg"
+        mock_message.bot.get_file = AsyncMock(return_value=mock_file)
+
+        # Return BytesIO
+        audio_data = BytesIO(b"audio data")
+        mock_message.bot.download_file = AsyncMock(return_value=audio_data)
+
+        processing_msg = AsyncMock()
+        mock_message.answer = AsyncMock(return_value=processing_msg)
+
+        mock_log = MagicMock()
+        mock_log.id = uuid4()
+        mock_log.rating = 4
+        mock_log.transcribed_text = "hello"
+        mock_log.feedback = "Good pronunciation!"
+
+        with (
+            patch("src.bot.handlers.voice.AsyncSessionMaker") as mock_session_maker,
+        ):
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.voice.VoiceService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.process_voice_message = AsyncMock(return_value=mock_log)
+
+                await on_voice_message(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_state.update_data.assert_called()
+        mock_state.set_state.assert_called_with(VoiceStates.showing_result)
+        processing_msg.edit_text.assert_called()
+
+    async def test_handles_exception(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+        mock_state: MagicMock,
+    ) -> None:
+        """Handler handles exception during processing."""
+        from aiogram.exceptions import TelegramBadRequest
+
+        mock_voice = MagicMock()
+        mock_voice.file_id = "file123"
+        mock_message.voice = mock_voice
+        mock_message.bot = AsyncMock()
+
+        word_id = str(uuid4())
+        words = [{"id": word_id, "text": "hello", "language": "en"}]
+        mock_state.get_data = AsyncMock(return_value={"words": words, "current_index": 0, "log_ids": []})
+
+        mock_file = MagicMock()
+        mock_file.file_path = "/path/to/file.ogg"
+        mock_message.bot.get_file = AsyncMock(return_value=mock_file)
+
+        audio_data = BytesIO(b"audio data")
+        mock_message.bot.download_file = AsyncMock(return_value=audio_data)
+
+        processing_msg = AsyncMock()
+        mock_message.answer = AsyncMock(return_value=processing_msg)
+
+        with (
+            patch("src.bot.handlers.voice.AsyncSessionMaker") as mock_session_maker,
+        ):
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.voice.VoiceService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.process_voice_message = AsyncMock(
+                    side_effect=TelegramBadRequest(method=MagicMock(), message="Bad request")
+                )
+
+                await on_voice_message(mock_message, mock_i18n, db_user, mock_state)
+
+        mock_state.set_state.assert_called_with(VoiceStates.waiting_for_voice)
+        processing_msg.edit_text.assert_called()

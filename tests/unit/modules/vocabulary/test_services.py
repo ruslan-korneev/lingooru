@@ -491,3 +491,70 @@ class TestWordListMethods:
         assert "list_1" in added_lists
         assert "list_2" in added_lists
         assert len(added_lists) == 2  # noqa: PLR2004
+
+
+class TestCreateWordFromDict:
+    """Tests for _create_word_from_dict method edge cases."""
+
+    async def test_create_word_from_dict_skips_existing(
+        self,
+        sample_user: UserReadDTO,
+        vocabulary_service: VocabularyService,
+    ) -> None:
+        """Test _create_word_from_dict returns early when word already exists."""
+        # First, add a word to DB
+        await vocabulary_service.add_word_with_translation(
+            user_id=sample_user.id,
+            text="preexisting",
+            translation="существующий",
+            source_language=Language.EN,
+            target_language=Language.RU,
+        )
+
+        # Now call _create_word_from_dict with same word - should return early
+        dict_result = DictionaryResult(
+            word="preexisting",
+            phonetic="/pri/",
+            audio_url="https://example.com/audio.mp3",
+            definition="already exists",
+            example="test",
+        )
+
+        # Should not raise and should return None (early return)
+        await vocabulary_service._create_word_from_dict(  # noqa: SLF001
+            dict_result,
+            Language.EN,
+        )
+
+    async def test_lookup_word_api_creates_word_then_skips_on_second_call(
+        self,
+        vocabulary_service: VocabularyService,
+    ) -> None:
+        """Test lookup_word creates word via API, second call hits existing check."""
+        mock_result = DictionaryResult(
+            word="apiword",
+            phonetic="/api/",
+            audio_url="https://example.com/audio.mp3",
+            definition="from api",
+            example="API test",
+        )
+
+        with patch.object(
+            vocabulary_service._dict_client,  # noqa: SLF001
+            "lookup",
+            new_callable=AsyncMock,
+            return_value=mock_result,
+        ):
+            # First call creates word
+            await vocabulary_service.lookup_word(
+                text="apiword",
+                source_language=Language.EN,
+                target_language=Language.RU,
+            )
+
+            # Second call - word exists, _create_word_from_dict should return early
+            await vocabulary_service.lookup_word(
+                text="apiword",
+                source_language=Language.EN,
+                target_language=Language.RU,
+            )
