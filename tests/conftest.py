@@ -39,6 +39,8 @@ from tests.mimic.session import FakeSessionMaker
 
 if TYPE_CHECKING:
     from src.core.asgi import FastAPIWrapper
+    from src.modules.teaching.repositories import TeacherStudentRepository
+    from src.modules.teaching.services import TeachingService
 
 
 @pytest.fixture(scope="session")
@@ -287,3 +289,20 @@ def review_log_repository(session: AsyncSession) -> ReviewLogRepository:
 @pytest.fixture
 def srs_service(session: AsyncSession) -> SRSService:
     return SRSService(session)
+
+
+# Module fixtures - Teaching
+
+
+@pytest.fixture
+def teaching_service(session: AsyncSession) -> "TeachingService":
+    from src.modules.teaching.services import TeachingService
+
+    return TeachingService(session)
+
+
+@pytest.fixture
+def teacher_student_repository(session: AsyncSession) -> "TeacherStudentRepository":
+    from src.modules.teaching.repositories import TeacherStudentRepository
+
+    return TeacherStudentRepository(session)

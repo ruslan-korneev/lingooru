@@ -45,6 +45,9 @@ def get_main_menu_keyboard(i18n: I18nContext) -> InlineKeyboardMarkup:
         InlineKeyboardButton(text=i18n.get("btn-stats"), callback_data="stats:show"),
     )
     builder.row(
+        InlineKeyboardButton(text=i18n.get("btn-teaching"), callback_data="teaching:role"),
+    )
+    builder.row(
         InlineKeyboardButton(text=i18n.get("btn-settings"), callback_data="settings:main"),
     )
     builder.row(

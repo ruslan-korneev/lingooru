@@ -197,3 +197,66 @@ voice-session-ended = 연습 종료!
 btn-voice-retry = 🔄 다시
 btn-voice-next = ➡️ 다음
 btn-voice-again = 🎤 다시
+
+# Teaching - Role Selection
+btn-teaching = 👨‍🏫 선생님/학생
+teaching-role-title = 👤 역할을 선택하세요
+teaching-role-desc = 선생님이나 학생이 될 수 있습니다 (둘 다도 가능!)
+
+# Teaching - Buttons
+btn-become-teacher = 👨‍🏫 선생님 되기
+btn-dashboard = 👨‍🏫 선생님 대시보드
+btn-my-teacher = 👨‍🎓 내 선생님
+btn-join-teacher = 👨‍🎓 선생님 참여
+btn-students = 👥 학생들
+btn-assignments = 📝 과제
+btn-invite = ➕ 초대
+btn-remove-student = ❌ 학생 제거
+btn-regenerate = 🔄 새 코드
+btn-leave-teacher = 🚪 나가기
+btn-my-assignments = 📝 내 과제
+btn-new-assignment = ➕ 새 과제
+btn-confirm = ✅ 예
+btn-cancel = ❌ 취소
+
+# Teaching - Invite
+teaching-invite-title = 📨 학생 초대
+teaching-invite-code = 초대 코드:
+    <code>{ $code }</code>
+teaching-invite-link = 또는 링크:
+    { $link }
+teaching-regenerated = ✅ 코드가 재생성되었습니다!
+
+# Teaching - Dashboard
+teaching-dashboard-title = 👨‍🏫 선생님 대시보드
+teaching-dashboard-stats = 👥 학생: { $students }명
+    📝 활성 과제: { $assignments }개
+
+# Teaching - Students
+teaching-students-title = 👥 내 학생들
+teaching-student-item = 👤 { $name }
+    📊 { $words }개 단어 • 🔥 { $streak }일
+teaching-no-students = 아직 학생이 없습니다.
+    첫 번째 학생을 초대하세요!
+teaching-remove-confirm = ⚠️ 이 학생을 제거하시겠습니까?
+teaching-removed = ✅ 학생이 제거되었습니다.
+
+# Teaching - Student Panel
+teaching-panel-title = 👨‍🎓 내 선생님
+teaching-panel-teacher = 👨‍🏫 { $name }
+teaching-no-teacher = 아직 선생님이 없습니다.
+    초대 코드를 입력하여 참여하세요.
+teaching-leave-confirm = ⚠️ 이 선생님을 나가시겠습니까?
+teaching-left = ✅ 선생님을 나갔습니다.
+
+# Teaching - Join
+teaching-join-prompt = 📝 초대 코드를 입력하세요:
+teaching-join-success = ✅ { $name } 선생님에게 참여했습니다!
+teaching-join-invalid = ❌ 잘못된 초대 코드입니다.
+teaching-join-self = ❌ 자신에게 참여할 수 없습니다.
+teaching-join-already = ❌ 이미 이 선생님에게 연결되어 있습니다.
+
+# Errors
+error-invalid-data = ❌ 잘못된 데이터
+error-not-found = ❌ 찾을 수 없음
+unknown-user = 사용자

@@ -1,9 +1,10 @@
 from aiogram import F, Router
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandObject, CommandStart
 from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
 
 from src.bot.handlers.menu import _build_menu_text
+from src.bot.handlers.teaching import handle_deep_link_join
 from src.bot.keyboards.menu import (
     get_language_selection_keyboard,
     get_main_menu_keyboard,
@@ -17,12 +18,23 @@ from src.modules.users.services import UserService
 
 router = Router(name="start")
 
+DEEP_LINK_JOIN_PREFIX = "join_"
+
 
 @router.message(CommandStart())
 async def cmd_start(
     message: Message,
     i18n: I18nContext,
+    db_user: UserReadDTO,
+    command: CommandObject,
 ) -> None:
+    # Handle deep link for joining a teacher
+    if command.args and command.args.startswith(DEEP_LINK_JOIN_PREFIX):
+        invite_code = command.args[len(DEEP_LINK_JOIN_PREFIX) :]
+        handled = await handle_deep_link_join(message, i18n, db_user, invite_code)
+        if handled:
+            return
+
     # Show language selection for all /start commands
     # Users can change settings from main menu later
     await message.answer(

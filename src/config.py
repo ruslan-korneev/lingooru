@@ -52,6 +52,7 @@ class RateLimitSettings(BaseModel):
 
 class TelegramSettings(BaseModel):
     bot_token: SecretStr = SecretStr("")
+    bot_username: str = "lingoorubot"
     webhook_url: str = ""
     webhook_secret: SecretStr = SecretStr("")
 

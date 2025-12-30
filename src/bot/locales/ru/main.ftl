@@ -197,3 +197,66 @@ voice-session-ended = Практика завершена!
 btn-voice-retry = 🔄 Ещё раз
 btn-voice-next = ➡️ Далее
 btn-voice-again = 🎤 Снова
+
+# Teaching - Role Selection
+btn-teaching = 👨‍🏫 Учитель/Ученик
+teaching-role-title = 👤 Выбери роль
+teaching-role-desc = Ты можешь быть учителем или учеником (или обоими!)
+
+# Teaching - Buttons
+btn-become-teacher = 👨‍🏫 Стать учителем
+btn-dashboard = 👨‍🏫 Панель учителя
+btn-my-teacher = 👨‍🎓 Мой учитель
+btn-join-teacher = 👨‍🎓 Присоединиться к учителю
+btn-students = 👥 Ученики
+btn-assignments = 📝 Задания
+btn-invite = ➕ Пригласить
+btn-remove-student = ❌ Удалить ученика
+btn-regenerate = 🔄 Новый код
+btn-leave-teacher = 🚪 Отключиться
+btn-my-assignments = 📝 Мои задания
+btn-new-assignment = ➕ Новое задание
+btn-confirm = ✅ Да
+btn-cancel = ❌ Отмена
+
+# Teaching - Invite
+teaching-invite-title = 📨 Пригласи ученика
+teaching-invite-code = Код приглашения:
+    <code>{ $code }</code>
+teaching-invite-link = Или ссылка:
+    { $link }
+teaching-regenerated = ✅ Код обновлён!
+
+# Teaching - Dashboard
+teaching-dashboard-title = 👨‍🏫 Панель учителя
+teaching-dashboard-stats = 👥 Учеников: { $students }
+    📝 Активных заданий: { $assignments }
+
+# Teaching - Students
+teaching-students-title = 👥 Мои ученики
+teaching-student-item = 👤 { $name }
+    📊 { $words } слов • 🔥 { $streak } дней
+teaching-no-students = У тебя пока нет учеников.
+    Пригласи первого!
+teaching-remove-confirm = ⚠️ Удалить этого ученика?
+teaching-removed = ✅ Ученик удалён.
+
+# Teaching - Student Panel
+teaching-panel-title = 👨‍🎓 Мой учитель
+teaching-panel-teacher = 👨‍🏫 { $name }
+teaching-no-teacher = У тебя пока нет учителя.
+    Введи код приглашения, чтобы присоединиться.
+teaching-leave-confirm = ⚠️ Отключиться от учителя?
+teaching-left = ✅ Ты отключился от учителя.
+
+# Teaching - Join
+teaching-join-prompt = 📝 Введи код приглашения:
+teaching-join-success = ✅ Ты присоединился к учителю { $name }!
+teaching-join-invalid = ❌ Неверный код приглашения.
+teaching-join-self = ❌ Нельзя присоединиться к себе.
+teaching-join-already = ❌ У тебя уже есть этот учитель.
+
+# Errors
+error-invalid-data = ❌ Неверные данные
+error-not-found = ❌ Не найдено
+unknown-user = Пользователь

@@ -10,6 +10,7 @@ from src.bot.handlers import (
     menu_router,
     review_router,
     start_router,
+    teaching_router,
     vocabulary_router,
     voice_router,
     word_lists_router,
@@ -36,6 +37,7 @@ def create_dispatcher() -> Dispatcher:
     dp.include_router(review_router)
     dp.include_router(word_lists_router)
     dp.include_router(voice_router)  # Voice handler before vocabulary
+    dp.include_router(teaching_router)  # Teaching module
     dp.include_router(vocabulary_router)  # Has general text handler, should be last before menu
     dp.include_router(menu_router)
 

@@ -197,3 +197,66 @@ voice-session-ended = Practice ended!
 btn-voice-retry = 🔄 Retry
 btn-voice-next = ➡️ Next
 btn-voice-again = 🎤 Again
+
+# Teaching - Role Selection
+btn-teaching = 👨‍🏫 Teacher/Student
+teaching-role-title = 👤 Choose your role
+teaching-role-desc = You can be a teacher or a student (or both!)
+
+# Teaching - Buttons
+btn-become-teacher = 👨‍🏫 Become a Teacher
+btn-dashboard = 👨‍🏫 Teacher Dashboard
+btn-my-teacher = 👨‍🎓 My Teacher
+btn-join-teacher = 👨‍🎓 Join a Teacher
+btn-students = 👥 Students
+btn-assignments = 📝 Assignments
+btn-invite = ➕ Invite
+btn-remove-student = ❌ Remove Student
+btn-regenerate = 🔄 New Code
+btn-leave-teacher = 🚪 Leave
+btn-my-assignments = 📝 My Assignments
+btn-new-assignment = ➕ New Assignment
+btn-confirm = ✅ Yes
+btn-cancel = ❌ Cancel
+
+# Teaching - Invite
+teaching-invite-title = 📨 Invite a Student
+teaching-invite-code = Invite code:
+    <code>{ $code }</code>
+teaching-invite-link = Or use link:
+    { $link }
+teaching-regenerated = ✅ Code regenerated!
+
+# Teaching - Dashboard
+teaching-dashboard-title = 👨‍🏫 Teacher Dashboard
+teaching-dashboard-stats = 👥 Students: { $students }
+    📝 Active assignments: { $assignments }
+
+# Teaching - Students
+teaching-students-title = 👥 My Students
+teaching-student-item = 👤 { $name }
+    📊 { $words } words • 🔥 { $streak } days
+teaching-no-students = You don't have any students yet.
+    Invite your first one!
+teaching-remove-confirm = ⚠️ Remove this student?
+teaching-removed = ✅ Student removed.
+
+# Teaching - Student Panel
+teaching-panel-title = 👨‍🎓 My Teacher
+teaching-panel-teacher = 👨‍🏫 { $name }
+teaching-no-teacher = You don't have a teacher yet.
+    Enter an invite code to join.
+teaching-leave-confirm = ⚠️ Leave this teacher?
+teaching-left = ✅ You left your teacher.
+
+# Teaching - Join
+teaching-join-prompt = 📝 Enter the invite code:
+teaching-join-success = ✅ You joined teacher { $name }!
+teaching-join-invalid = ❌ Invalid invite code.
+teaching-join-self = ❌ You can't join yourself.
+teaching-join-already = ❌ You're already connected to this teacher.
+
+# Errors
+error-invalid-data = ❌ Invalid data
+error-not-found = ❌ Not found
+unknown-user = User

@@ -17,13 +17,52 @@ class TestCmdStart:
         self,
         mock_message: MagicMock,
         mock_i18n: MagicMock,
+        db_user: UserReadDTO,
     ) -> None:
         """Handler sends welcome message with language selection."""
-        await cmd_start(mock_message, mock_i18n)
+        mock_command = MagicMock()
+        mock_command.args = None
+
+        await cmd_start(mock_message, mock_i18n, db_user, mock_command)
 
         mock_message.answer.assert_called_once()
         mock_i18n.get.assert_any_call("welcome")
         mock_i18n.get.assert_any_call("welcome-choose-lang")
+
+    async def test_handles_deep_link_join(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+    ) -> None:
+        """Handler handles deep link join."""
+        mock_command = MagicMock()
+        mock_command.args = "join_ABC123DEF456"
+
+        with patch("src.bot.handlers.start.handle_deep_link_join", new_callable=AsyncMock) as mock_handle:
+            mock_handle.return_value = True
+
+            await cmd_start(mock_message, mock_i18n, db_user, mock_command)
+
+        mock_handle.assert_called_once_with(mock_message, mock_i18n, db_user, "ABC123DEF456")
+        mock_message.answer.assert_not_called()
+
+    async def test_continues_to_welcome_when_join_fails(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+    ) -> None:
+        """Handler shows welcome when deep link join fails."""
+        mock_command = MagicMock()
+        mock_command.args = "join_INVALID"
+
+        with patch("src.bot.handlers.start.handle_deep_link_join", new_callable=AsyncMock) as mock_handle:
+            mock_handle.return_value = False
+
+            await cmd_start(mock_message, mock_i18n, db_user, mock_command)
+
+        mock_message.answer.assert_called_once()
 
 
 class TestOnLanguageSelected:
