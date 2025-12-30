@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.config import settings
+from src.bot.bot_info import get_bot_username
 from src.core.exceptions import ConflictError, NotFoundError, ValidationError
 from src.modules.teaching.dto import (
     InviteCodeDTO,
@@ -24,8 +24,7 @@ def generate_invite_code() -> str:
 
 def create_deep_link(invite_code: str) -> str:
     """Create a deep link for the invite code."""
-    bot_username = settings.telegram.bot_username
-    return f"https://t.me/{bot_username}?start=join_{invite_code}"
+    return f"https://t.me/{get_bot_username()}?start=join_{invite_code}"
 
 
 class TeachingService:

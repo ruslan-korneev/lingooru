@@ -29,9 +29,11 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     """Application lifespan handler for bot webhook setup/teardown."""
     # Startup
     if settings.telegram.bot_token.get_secret_value():
+        from src.bot.bot_info import init_bot_info
         from src.bot.dispatcher import get_bot
 
         bot = get_bot()
+        await init_bot_info(bot)
 
         if settings.telegram.webhook_url:
             webhook_url = f"{settings.telegram.webhook_url}/v1/telegram/webhook"

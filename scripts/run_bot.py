@@ -5,6 +5,7 @@ import asyncio
 
 from loguru import logger
 
+from src.bot.bot_info import init_bot_info
 from src.bot.dispatcher import create_bot, create_dispatcher
 
 
@@ -12,6 +13,9 @@ async def main() -> None:
     """Start bot in polling mode."""
     bot = create_bot()
     dp = create_dispatcher()
+
+    # Initialize bot info (username, etc.)
+    await init_bot_info(bot)
 
     # Delete any existing webhook
     await bot.delete_webhook(drop_pending_updates=True)
