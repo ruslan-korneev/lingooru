@@ -18,7 +18,7 @@ from src.modules.vocabulary.dto import (
     WordCreateDTO,
     WordWithTranslationDTO,
 )
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 from src.modules.vocabulary.repositories import (
     TranslationRepository,
     UserWordListRepository,
@@ -56,7 +56,7 @@ class VocabularyService:
                 return word_with_trans
 
         # If not in DB and source is English, try dictionary API
-        if source_language == Language.EN:
+        if source_language is Language.EN:
             dict_result = await self._dict_client.lookup(text)
             if dict_result:
                 # Store the word in DB (without translation - will be added later)

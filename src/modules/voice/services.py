@@ -6,7 +6,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 from src.modules.voice.dto import (
     PronunciationLogCreateDTO,
     PronunciationLogReadDTO,

@@ -18,7 +18,8 @@ from src.modules.vocabulary.dto import (
     WordReadDTO,
     WordWithTranslationDTO,
 )
-from src.modules.vocabulary.models import Language, Translation, UserWord, UserWordList, Word
+from src.modules.vocabulary.enums import Language
+from src.modules.vocabulary.models import Translation, UserWord, UserWordList, Word
 
 
 class WordRepository(BaseRepository[Word, WordCreateDTO, WordReadDTO]):

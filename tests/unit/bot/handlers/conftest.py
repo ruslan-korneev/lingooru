@@ -10,7 +10,7 @@ from aiogram.types import CallbackQuery, Chat, Message, User
 from aiogram_i18n import I18nContext
 
 from src.modules.users.dto import UserReadDTO
-from src.modules.users.models import LanguagePair, UILanguage
+from src.modules.users.enums import LanguagePair, UILanguage
 
 
 @pytest.fixture

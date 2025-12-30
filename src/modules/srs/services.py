@@ -15,7 +15,7 @@ from src.modules.srs.dto import (
     ReviewWithWordDTO,
 )
 from src.modules.srs.repositories import ReviewLogRepository, ReviewRepository
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 
 class SRSService:

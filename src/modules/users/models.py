@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from enum import Enum
 
 from sqlalchemy import UUID as SA_UUID
 from sqlalchemy import BigInteger, String
@@ -8,17 +7,7 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.db.base import SAModel
-
-
-class UILanguage(str, Enum):
-    RU = "ru"
-    EN = "en"
-    KO = "ko"
-
-
-class LanguagePair(str, Enum):
-    EN_RU = "en_ru"
-    KO_RU = "ko_ru"
+from src.modules.users.enums import LanguagePair, UILanguage
 
 
 class User(SAModel):

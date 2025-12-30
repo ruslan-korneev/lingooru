@@ -12,7 +12,7 @@ from src.bot.keyboards.menu import (
 from src.bot.utils import parse_callback_param
 from src.db.session import AsyncSessionMaker
 from src.modules.users.dto import UserReadDTO, UserUpdateDTO
-from src.modules.users.models import LanguagePair, UILanguage
+from src.modules.users.enums import LanguagePair, UILanguage
 from src.modules.users.services import UserService
 
 router = Router(name="start")

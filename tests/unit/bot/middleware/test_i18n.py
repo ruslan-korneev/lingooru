@@ -6,7 +6,7 @@ from aiogram.types import TelegramObject, User
 
 from src.bot.middleware.i18n import UserLocaleManager
 from src.modules.users.dto import UserReadDTO
-from src.modules.users.models import LanguagePair, UILanguage
+from src.modules.users.enums import LanguagePair, UILanguage
 
 
 def create_user_dto(ui_language: UILanguage) -> UserReadDTO:

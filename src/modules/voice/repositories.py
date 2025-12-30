@@ -8,7 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import func as sql_func
 
 from src.core.types.repositories import BaseRepository
-from src.modules.vocabulary.models import Language, UserWord, Word
+from src.modules.vocabulary.enums import Language
+from src.modules.vocabulary.models import UserWord, Word
 from src.modules.voice.dto import (
     PronunciationLogCreateDTO,
     PronunciationLogReadDTO,

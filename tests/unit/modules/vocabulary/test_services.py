@@ -6,7 +6,7 @@ from src.core.exceptions import ConflictError
 from src.modules.users.dto import UserReadDTO
 from src.modules.vocabulary.dictionary_client import DictionaryResult
 from src.modules.vocabulary.dto import ManualWordInputDTO
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 from src.modules.vocabulary.services import VocabularyService
 
 # Test constants

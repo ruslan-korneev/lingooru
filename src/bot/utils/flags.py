@@ -1,4 +1,4 @@
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 LANGUAGE_FLAGS: dict[Language, str] = {
     Language.EN: "🇬🇧",

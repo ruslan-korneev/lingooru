@@ -7,7 +7,8 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.audio.services import AudioService
-from src.modules.vocabulary.models import Language, Word
+from src.modules.vocabulary.enums import Language
+from src.modules.vocabulary.models import Word
 
 
 @pytest.fixture

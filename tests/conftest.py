@@ -28,7 +28,7 @@ from src.modules.vocabulary.dto import (
     WordCreateDTO,
     WordReadDTO,
 )
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 from src.modules.vocabulary.repositories import (
     TranslationRepository,
     UserWordRepository,

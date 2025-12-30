@@ -14,7 +14,7 @@ from src.bot.utils import get_flag, get_language_pair, parse_callback_int, parse
 from src.core.exceptions import ConflictError
 from src.db.session import AsyncSessionMaker
 from src.modules.users.dto import UserReadDTO
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 from src.modules.vocabulary.services import VocabularyService
 
 router = Router(name="vocabulary")

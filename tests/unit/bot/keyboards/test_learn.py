@@ -12,7 +12,7 @@ from src.bot.keyboards.learn import (
     get_word_added_keyboard,
     get_word_not_found_keyboard,
 )
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 # Expected keyboard row counts
 ROWS_MENU_ONLY = 1

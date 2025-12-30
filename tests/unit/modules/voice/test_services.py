@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.srs.services import SRSService
 from src.modules.users.dto import UserReadDTO
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 from src.modules.vocabulary.services import VocabularyService
 from src.modules.voice.openai_client import PronunciationEvaluation, TranscriptionResult
 from src.modules.voice.services import VoiceService

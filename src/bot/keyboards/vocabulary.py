@@ -3,7 +3,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram_i18n import I18nContext
 
 from src.bot.utils.flags import get_flag
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 
 def get_vocabulary_keyboard(i18n: I18nContext) -> InlineKeyboardMarkup:
@@ -46,7 +46,7 @@ def get_vocabulary_pagination_keyboard(
         )
     )
 
-    en_selected = "✓ " if current_filter == Language.EN else ""
+    en_selected = "✓ " if current_filter is Language.EN else ""
     filter_buttons.append(
         InlineKeyboardButton(
             text=f"{en_selected}{get_flag(Language.EN)}",
@@ -54,7 +54,7 @@ def get_vocabulary_pagination_keyboard(
         )
     )
 
-    ko_selected = "✓ " if current_filter == Language.KO else ""
+    ko_selected = "✓ " if current_filter is Language.KO else ""
     filter_buttons.append(
         InlineKeyboardButton(
             text=f"{ko_selected}{get_flag(Language.KO)}",

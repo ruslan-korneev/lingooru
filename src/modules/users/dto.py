@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from src.core.types.dto import BaseDTO
-from src.modules.users.models import LanguagePair, UILanguage
+from src.modules.users.enums import LanguagePair, UILanguage
 
 
 class UserCreateDTO(BaseDTO):

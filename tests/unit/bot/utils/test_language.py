@@ -1,8 +1,8 @@
 """Unit tests for language utilities."""
 
 from src.bot.utils.language import get_language_pair
-from src.modules.users.models import LanguagePair
-from src.modules.vocabulary.models import Language
+from src.modules.users.enums import LanguagePair
+from src.modules.vocabulary.enums import Language
 
 
 class TestGetLanguagePair:
@@ -11,14 +11,14 @@ class TestGetLanguagePair:
     def test_en_ru_pair(self) -> None:
         """Should return EN and RU for EN_RU pair."""
         source, target = get_language_pair(LanguagePair.EN_RU)
-        assert source == Language.EN
-        assert target == Language.RU
+        assert source is Language.EN
+        assert target is Language.RU
 
     def test_ko_ru_pair(self) -> None:
         """Should return KO and RU for KO_RU pair."""
         source, target = get_language_pair(LanguagePair.KO_RU)
-        assert source == Language.KO
-        assert target == Language.RU
+        assert source is Language.KO
+        assert target is Language.RU
 
     def test_returns_tuple(self) -> None:
         """Should return a tuple of two Language values."""

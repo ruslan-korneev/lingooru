@@ -13,7 +13,7 @@ from src.bot.handlers.learn import (
     on_word_add_prompt,
 )
 from src.modules.users.dto import UserReadDTO
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 
 class TestOnLearnStart:
@@ -153,7 +153,7 @@ class TestOnLearnLanguageSelected:
         mock_start.assert_called_once()
         # Check that source_language is Language.EN
         call_kwargs = mock_start.call_args.kwargs
-        assert call_kwargs["source_language"] == Language.EN
+        assert call_kwargs["source_language"] is Language.EN
         mock_callback.answer.assert_called_once()
 
     async def test_selects_korean_language(
@@ -172,7 +172,7 @@ class TestOnLearnLanguageSelected:
             await on_learn_language_selected(mock_callback, mock_i18n, db_user, mock_state)
 
         call_kwargs = mock_start.call_args.kwargs
-        assert call_kwargs["source_language"] == Language.KO
+        assert call_kwargs["source_language"] is Language.KO
         mock_callback.answer.assert_called_once()
 
     async def test_selects_mix_all_languages(

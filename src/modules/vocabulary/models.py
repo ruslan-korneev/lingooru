@@ -1,20 +1,12 @@
 import uuid
 from datetime import datetime
-from enum import Enum
 
 from sqlalchemy import UUID as SA_UUID
 from sqlalchemy import ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.base import SAModel
-
-
-class Language(str, Enum):
-    """Supported languages."""
-
-    EN = "en"
-    KO = "ko"
-    RU = "ru"
+from src.modules.vocabulary.enums import Language
 
 
 class Word(SAModel):

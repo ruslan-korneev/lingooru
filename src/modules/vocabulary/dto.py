@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import Field
 
 from src.core.types.dto import BaseDTO
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 
 # Word DTOs

@@ -1,7 +1,7 @@
 """Language utilities for Telegram bot handlers."""
 
-from src.modules.users.models import LanguagePair
-from src.modules.vocabulary.models import Language
+from src.modules.users.enums import LanguagePair
+from src.modules.vocabulary.enums import Language
 
 
 def get_language_pair(pair: LanguagePair) -> tuple[Language, Language]:

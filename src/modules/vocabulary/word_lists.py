@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 
 @dataclass

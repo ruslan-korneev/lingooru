@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram_i18n import I18nContext
 
 from src.bot.utils.flags import get_flag
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 
 def get_language_selection_keyboard(

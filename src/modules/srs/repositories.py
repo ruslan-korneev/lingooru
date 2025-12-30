@@ -16,7 +16,8 @@ from src.modules.srs.dto import (
     ReviewWithWordDTO,
 )
 from src.modules.srs.models import Review, ReviewLog
-from src.modules.vocabulary.models import Language, Translation, UserWord, Word
+from src.modules.vocabulary.enums import Language
+from src.modules.vocabulary.models import Translation, UserWord, Word
 
 
 class ReviewRepository(BaseRepository[Review, ReviewCreateDTO, ReviewReadDTO]):

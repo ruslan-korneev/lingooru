@@ -8,7 +8,7 @@ from src.modules.vocabulary.dto import (
     UserWordCreateDTO,
     WordCreateDTO,
 )
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 from src.modules.vocabulary.repositories import (
     TranslationRepository,
     UserWordRepository,
@@ -39,7 +39,7 @@ class TestWordRepository:
 
         assert result.id is not None
         assert result.text == WORD_TEXT_SAVE
-        assert result.language == Language.EN
+        assert result.language is Language.EN
         assert result.phonetic == "/ˈæp.əl/"  # noqa: RUF001
 
     async def test_get_by_text_and_language(
@@ -56,7 +56,7 @@ class TestWordRepository:
 
         assert result is not None
         assert result.text == WORD_TEXT_LOOKUP
-        assert result.language == Language.EN
+        assert result.language is Language.EN
 
     async def test_get_by_text_and_language_not_found(
         self,
@@ -167,7 +167,7 @@ class TestTranslationRepository:
         assert result.id is not None
         assert result.word_id == word.id
         assert result.translated_text == "тестовое слово"
-        assert result.target_language == Language.RU
+        assert result.target_language is Language.RU
 
     async def test_get_by_word_and_language(
         self,
@@ -194,7 +194,7 @@ class TestTranslationRepository:
 
         assert result is not None
         assert result.word_id == word.id
-        assert result.target_language == Language.RU
+        assert result.target_language is Language.RU
 
     async def test_get_by_word_and_language_not_found(
         self,
@@ -461,7 +461,7 @@ class TestUserWordRepository:
             limit=10,
         )
         assert len(en_result) == 3  # noqa: PLR2004
-        assert all(item.word.language == Language.EN for item in en_result)
+        assert all(item.word.language is Language.EN for item in en_result)
 
         # Test filter by Korean
         ko_result = await user_word_repository.get_words_for_learning(
@@ -471,7 +471,7 @@ class TestUserWordRepository:
             limit=10,
         )
         assert len(ko_result) == 2  # noqa: PLR2004
-        assert all(item.word.language == Language.KO for item in ko_result)
+        assert all(item.word.language is Language.KO for item in ko_result)
 
         # Test no filter (all languages)
         all_result = await user_word_repository.get_words_for_learning(
@@ -739,7 +739,7 @@ class TestUserWordRepository:
         )
         assert len(en_result.items) == 3  # noqa: PLR2004
         assert en_result.total == 3  # noqa: PLR2004
-        assert all(item.word.language == Language.EN for item in en_result.items)
+        assert all(item.word.language is Language.EN for item in en_result.items)
 
         # Test filter by Korean
         ko_result = await user_word_repository.get_user_vocabulary_paginated(
@@ -751,7 +751,7 @@ class TestUserWordRepository:
         )
         assert len(ko_result.items) == 2  # noqa: PLR2004
         assert ko_result.total == 2  # noqa: PLR2004
-        assert all(item.word.language == Language.KO for item in ko_result.items)
+        assert all(item.word.language is Language.KO for item in ko_result.items)
 
         # Test no filter (all languages)
         all_result = await user_word_repository.get_user_vocabulary_paginated(

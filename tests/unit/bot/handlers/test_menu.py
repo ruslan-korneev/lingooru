@@ -12,7 +12,7 @@ from src.bot.handlers.menu import (
     on_settings,
 )
 from src.modules.users.dto import UserReadDTO
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 
 class TestOnMainMenu:

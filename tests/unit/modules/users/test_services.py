@@ -4,7 +4,7 @@ import pytest
 
 from src.core.exceptions import ConflictError, NotFoundError
 from src.modules.users.dto import UserCreateDTO, UserUpdateDTO
-from src.modules.users.models import LanguagePair, UILanguage
+from src.modules.users.enums import LanguagePair, UILanguage
 from src.modules.users.services import UserService
 
 TELEGRAM_ID_CREATE = 111222333
@@ -34,8 +34,8 @@ class TestUserService:
         assert created is True
         assert user.telegram_id == TELEGRAM_ID_CREATE
         assert user.username == "newuser"
-        assert user.ui_language == UILanguage.RU
-        assert user.language_pair == LanguagePair.EN_RU
+        assert user.ui_language is UILanguage.RU
+        assert user.language_pair is LanguagePair.EN_RU
 
     async def test_get_or_create_returns_existing(
         self,
@@ -80,7 +80,7 @@ class TestUserService:
             UserUpdateDTO(ui_language=UILanguage.EN),
         )
 
-        assert updated.ui_language == UILanguage.EN
+        assert updated.ui_language is UILanguage.EN
 
     async def test_update_language_pair(
         self,
@@ -94,7 +94,7 @@ class TestUserService:
             UserUpdateDTO(language_pair=LanguagePair.KO_RU),
         )
 
-        assert updated.language_pair == LanguagePair.KO_RU
+        assert updated.language_pair is LanguagePair.KO_RU
 
     async def test_create_raises_conflict_for_duplicate(
         self,
@@ -152,9 +152,9 @@ class TestUserService:
             UserUpdateDTO(language_pair=LanguagePair.KO_RU),
         )
 
-        assert updated.language_pair == LanguagePair.KO_RU
+        assert updated.language_pair is LanguagePair.KO_RU
         # ui_language should remain unchanged
-        assert updated.ui_language == UILanguage.RU
+        assert updated.ui_language is UILanguage.RU
 
     async def test_update_with_explicit_none_value(
         self,

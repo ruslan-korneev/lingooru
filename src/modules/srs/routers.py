@@ -17,7 +17,7 @@ from src.modules.srs.dto import (
     ReviewWithWordDTO,
 )
 from src.modules.srs.services import SRSService
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 

@@ -8,7 +8,7 @@ from src.bot.keyboards.vocabulary import (
     get_vocabulary_keyboard,
     get_vocabulary_pagination_keyboard,
 )
-from src.modules.vocabulary.models import Language
+from src.modules.vocabulary.enums import Language
 
 # Expected keyboard row counts
 ROWS_WITH_MENU = 2

@@ -277,7 +277,7 @@ class TestShowVocabularyPageFilters:
         mock_message: MagicMock,
     ) -> None:
         """Handler skips reading state when source_filter is explicitly provided."""
-        from src.modules.vocabulary.models import Language
+        from src.modules.vocabulary.enums import Language
 
         mock_callback.message = mock_message
         # State contains a different filter value - but should be ignored
