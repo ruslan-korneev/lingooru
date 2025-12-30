@@ -1,12 +1,12 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UILanguage(str, Enum):
+class UILanguage(StrEnum):
     RU = "ru"
     EN = "en"
     KO = "ko"
 
 
-class LanguagePair(str, Enum):
+class LanguagePair(StrEnum):
     EN_RU = "en_ru"
     KO_RU = "ko_ru"

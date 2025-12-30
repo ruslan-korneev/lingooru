@@ -2,39 +2,33 @@
 
 import asyncio
 import io
-from typing import ClassVar
 
 from gtts import gTTS
 from gtts.tts import gTTSError
 from loguru import logger
 
+from src.modules.vocabulary.enums import Language
+
 
 class GTTSClient:
     """Text-to-speech client using gTTS library."""
 
-    LANGUAGE_MAP: ClassVar[dict[str, str]] = {
-        "en": "en",
-        "ko": "ko",
-        "ru": "ru",
-    }
-
     async def generate(
         self,
         text: str,
-        language: str,
+        language: Language,
     ) -> bytes:
         """Generate speech audio for text.
 
         Args:
             text: Text to convert to speech
-            language: Language code (en, ko, ru)
+            language: Target language
 
         Returns:
             Audio bytes in MP3 format
         """
-        lang_code = self.LANGUAGE_MAP.get(language, "en")
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, self._generate_sync, text, lang_code)
+        return await loop.run_in_executor(None, self._generate_sync, text, language.value)
 
     def _generate_sync(self, text: str, language: str) -> bytes:
         """Synchronous generation using gTTS."""

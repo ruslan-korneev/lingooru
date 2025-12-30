@@ -80,7 +80,7 @@ class AudioService:
             # Generate audio
             audio_bytes = await self._gtts.generate(
                 text=word.text,
-                language=word.language.value,
+                language=word.language,
             )
 
             # Upload to S3
