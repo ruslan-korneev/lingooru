@@ -1,6 +1,6 @@
 """SRS API endpoints for review management."""
 
-from typing import Annotated, Any
+from typing import Annotated
 from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
@@ -23,20 +23,17 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 REVIEW_NOT_FOUND = "Review not found"
 
-# Sentinel for dependency injection - typed as Any to avoid type errors with None default
-_INJECTED: Any = None
-
 
 @router.get("/due/{user_id}")
 @inject
 async def get_due_reviews(
     user_id: UUID,
-    target_language: Annotated[Language, Query()] = Language.RU,
-    limit: Annotated[int, Query(ge=1, le=50)] = 20,
     db_session_maker: Annotated[
         AsyncSessionMaker,
         Depends(Provide[Container.db_session_maker]),
-    ] = _INJECTED,
+    ],
+    target_language: Annotated[Language, Query()] = Language.RU,
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
 ) -> PaginatedResponse[ReviewWithWordDTO]:
     """Get words due for review for a user."""
     async with db_session_maker as session:
@@ -61,7 +58,7 @@ async def count_due_reviews(
     db_session_maker: Annotated[
         AsyncSessionMaker,
         Depends(Provide[Container.db_session_maker]),
-    ] = _INJECTED,
+    ],
 ) -> DueReviewsCountDTO:
     """Count reviews due for a user."""
     async with db_session_maker as session:
@@ -77,7 +74,7 @@ async def get_review(
     db_session_maker: Annotated[
         AsyncSessionMaker,
         Depends(Provide[Container.db_session_maker]),
-    ] = _INJECTED,
+    ],
 ) -> ReviewReadDTO:
     """Get review by ID."""
     async with db_session_maker as session:
@@ -96,7 +93,7 @@ async def rate_review(
     db_session_maker: Annotated[
         AsyncSessionMaker,
         Depends(Provide[Container.db_session_maker]),
-    ] = _INJECTED,
+    ],
 ) -> ReviewReadDTO:
     """Submit quality rating for a review and update SM-2 parameters."""
     async with db_session_maker as session:
