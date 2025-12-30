@@ -256,7 +256,64 @@ teaching-join-invalid = ❌ Неверный код приглашения.
 teaching-join-self = ❌ Нельзя присоединиться к себе.
 teaching-join-already = ❌ У тебя уже есть этот учитель.
 
+# Assignments
+assign-list-title = 📝 Задания
+assign-no-assignments = 📝 У тебя пока нет заданий.
+assign-pending-title = 📝 Мои задания
+assign-no-pending = ✅ У тебя нет активных заданий.
+assign-select-type = Выбери тип задания:
+assign-select-method = Как создать задание?
+assign-select-difficulty = Выбери сложность:
+assign-enter-topic = 📝 Введи тему для задания:
+assign-generating = ⏳ Генерирую задание...
+assign-created = ✅ Задание "{ $title }" создано!
+assign-view-title = 📝 { $title }
+assign-type = Тип
+assign-status = Статус
+assign-pronounce = 🎤 Произнеси слова:
+assign-answer = 📝 Ответь на вопросы (каждый ответ с новой строки):
+assign-score = 📊 Оценка
+assign-submitted = ✅ Ответ отправлен!
+assign-submission-title = 📝 Ответ ученика
+assign-ai-feedback = 🤖 AI:
+assign-ai-score = Оценка AI
+assign-grade = Оценка учителя
+assign-select-grade = Выбери оценку:
+assign-graded = ✅ Оценка { $grade }/5 выставлена!
+assign-result-title = 📊 Результат задания
+
+# Assignment types
+type-text = Текст
+type-multiple_choice = Тест
+type-voice = Голос
+
+# Assignment statuses
+status-published = Ожидает
+status-submitted = На проверке
+status-graded = Проверено
+
+# Assignment buttons
+btn-type-text = 📝 Текстовый ответ
+btn-type-mc = ❓ Тест с вариантами
+btn-type-voice = 🎤 Голосовой ответ
+btn-method-ai = 🤖 Сгенерировать AI
+btn-method-manual = ✏️ Создать вручную
+btn-easy = Легко
+btn-medium = Средне
+btn-hard = Сложно
+btn-view-submission = 👀 Смотреть ответ
+btn-start-assignment = ▶️ Начать
+btn-view-result = 📊 Результат
+btn-grade = 📝 Оценить
+
 # Errors
 error-invalid-data = ❌ Неверные данные
 error-not-found = ❌ Не найдено
+error-empty-topic = ❌ Тема не может быть пустой
+error-empty-answer = ❌ Ответ не может быть пустым
+error-generation-failed = ❌ Не удалось сгенерировать задание
+error-no-questions = ❌ В задании нет вопросов
+error-not-your-assignment = ❌ Это не твоё задание
+error-no-submission = ❌ Ответ не найден
+success = ✅ Успешно!
 unknown-user = Пользователь

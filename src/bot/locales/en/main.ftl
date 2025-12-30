@@ -256,7 +256,64 @@ teaching-join-invalid = ❌ Invalid invite code.
 teaching-join-self = ❌ You can't join yourself.
 teaching-join-already = ❌ You're already connected to this teacher.
 
+# Assignments
+assign-list-title = 📝 Assignments
+assign-no-assignments = 📝 You don't have any assignments yet.
+assign-pending-title = 📝 My Assignments
+assign-no-pending = ✅ You have no active assignments.
+assign-select-type = Choose assignment type:
+assign-select-method = How to create assignment?
+assign-select-difficulty = Choose difficulty:
+assign-enter-topic = 📝 Enter topic for the assignment:
+assign-generating = ⏳ Generating assignment...
+assign-created = ✅ Assignment "{ $title }" created!
+assign-view-title = 📝 { $title }
+assign-type = Type
+assign-status = Status
+assign-pronounce = 🎤 Pronounce the words:
+assign-answer = 📝 Answer the questions (each answer on a new line):
+assign-score = 📊 Score
+assign-submitted = ✅ Answer submitted!
+assign-submission-title = 📝 Student's answer
+assign-ai-feedback = 🤖 AI:
+assign-ai-score = AI Score
+assign-grade = Teacher's grade
+assign-select-grade = Select grade:
+assign-graded = ✅ Grade { $grade }/5 submitted!
+assign-result-title = 📊 Assignment result
+
+# Assignment types
+type-text = Text
+type-multiple_choice = Quiz
+type-voice = Voice
+
+# Assignment statuses
+status-published = Pending
+status-submitted = Under review
+status-graded = Graded
+
+# Assignment buttons
+btn-type-text = 📝 Text answer
+btn-type-mc = ❓ Multiple choice
+btn-type-voice = 🎤 Voice answer
+btn-method-ai = 🤖 Generate with AI
+btn-method-manual = ✏️ Create manually
+btn-easy = Easy
+btn-medium = Medium
+btn-hard = Hard
+btn-view-submission = 👀 View answer
+btn-start-assignment = ▶️ Start
+btn-view-result = 📊 Result
+btn-grade = 📝 Grade
+
 # Errors
 error-invalid-data = ❌ Invalid data
 error-not-found = ❌ Not found
+error-empty-topic = ❌ Topic cannot be empty
+error-empty-answer = ❌ Answer cannot be empty
+error-generation-failed = ❌ Failed to generate assignment
+error-no-questions = ❌ Assignment has no questions
+error-not-your-assignment = ❌ This is not your assignment
+error-no-submission = ❌ Answer not found
+success = ✅ Success!
 unknown-user = User

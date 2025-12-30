@@ -256,7 +256,64 @@ teaching-join-invalid = ❌ 잘못된 초대 코드입니다.
 teaching-join-self = ❌ 자신에게 참여할 수 없습니다.
 teaching-join-already = ❌ 이미 이 선생님에게 연결되어 있습니다.
 
+# Assignments
+assign-list-title = 📝 과제
+assign-no-assignments = 📝 아직 과제가 없습니다.
+assign-pending-title = 📝 내 과제
+assign-no-pending = ✅ 활성 과제가 없습니다.
+assign-select-type = 과제 유형을 선택하세요:
+assign-select-method = 과제 생성 방법:
+assign-select-difficulty = 난이도를 선택하세요:
+assign-enter-topic = 📝 과제 주제를 입력하세요:
+assign-generating = ⏳ 과제 생성 중...
+assign-created = ✅ 과제 "{ $title }" 생성됨!
+assign-view-title = 📝 { $title }
+assign-type = 유형
+assign-status = 상태
+assign-pronounce = 🎤 단어를 발음하세요:
+assign-answer = 📝 질문에 답하세요 (각 답변은 새 줄에):
+assign-score = 📊 점수
+assign-submitted = ✅ 답변 제출됨!
+assign-submission-title = 📝 학생 답변
+assign-ai-feedback = 🤖 AI:
+assign-ai-score = AI 점수
+assign-grade = 선생님 점수
+assign-select-grade = 점수를 선택하세요:
+assign-graded = ✅ 점수 { $grade }/5 제출됨!
+assign-result-title = 📊 과제 결과
+
+# Assignment types
+type-text = 텍스트
+type-multiple_choice = 퀴즈
+type-voice = 음성
+
+# Assignment statuses
+status-published = 대기 중
+status-submitted = 검토 중
+status-graded = 채점됨
+
+# Assignment buttons
+btn-type-text = 📝 텍스트 답변
+btn-type-mc = ❓ 객관식
+btn-type-voice = 🎤 음성 답변
+btn-method-ai = 🤖 AI로 생성
+btn-method-manual = ✏️ 직접 만들기
+btn-easy = 쉬움
+btn-medium = 보통
+btn-hard = 어려움
+btn-view-submission = 👀 답변 보기
+btn-start-assignment = ▶️ 시작
+btn-view-result = 📊 결과
+btn-grade = 📝 채점
+
 # Errors
 error-invalid-data = ❌ 잘못된 데이터
 error-not-found = ❌ 찾을 수 없음
+error-empty-topic = ❌ 주제가 비어 있을 수 없습니다
+error-empty-answer = ❌ 답변이 비어 있을 수 없습니다
+error-generation-failed = ❌ 과제 생성 실패
+error-no-questions = ❌ 과제에 질문이 없습니다
+error-not-your-assignment = ❌ 이것은 당신의 과제가 아닙니다
+error-no-submission = ❌ 답변을 찾을 수 없음
+success = ✅ 성공!
 unknown-user = 사용자

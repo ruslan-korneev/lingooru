@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -48,7 +50,7 @@ def create_dispatcher() -> Dispatcher:
     # Setup i18n middleware
     i18n_middleware = I18nMiddleware(
         core=FluentRuntimeCore(
-            path="src/bot/locales/{locale}",
+            path=str(Path(__file__).parent / "locales" / "{locale}"),
             default_locale="ru",
         ),
         manager=UserLocaleManager(),
