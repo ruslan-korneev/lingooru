@@ -1,0 +1,92 @@
+services:
+  app:
+    image: ghcr.io/${GITHUB_REPOSITORY:-ruslankorneev/lingooru}:${IMAGE_TAG:-latest}
+    container_name: lingooru-app
+    restart: unless-stopped
+    command: ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    environment:
+      # App
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - LOGGING_LEVEL=${LOGGING_LEVEL:-INFO}
+      # Database
+      - DB__HOST=postgres
+      - DB__PORT=5432
+      - DB__NAME=${DB_NAME:-lingooru}
+      - DB__USERNAME=${DB_USERNAME:-lingooru}
+      - DB__PASSWORD=${DB_PASSWORD:?DB_PASSWORD is required}
+      # Telegram
+      - TELEGRAM__BOT_TOKEN=${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN is required}
+      - TELEGRAM__WEBHOOK_URL=${TELEGRAM_WEBHOOK_URL:-}
+      - TELEGRAM__WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET:-}
+      # S3/MinIO
+      - S3__ENDPOINT_URL=http://minio:9000
+      - S3__ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - S3__SECRET_KEY=${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+      - S3__BUCKET_NAME=${S3_BUCKET_NAME:-lingooru-audio}
+      - S3__PUBLIC_URL_BASE=${S3_PUBLIC_URL_BASE:-}
+      # OpenAI (optional)
+      - OPENAI__API_KEY=${OPENAI_API_KEY:-}
+      # Sentry (optional)
+      - SENTRY__DSN=${SENTRY_DSN:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - lingooru
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: lingooru-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${DB_NAME:-lingooru}
+      - POSTGRES_USER=${DB_USERNAME:-lingooru}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lingooru
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-lingooru} -d ${DB_NAME:-lingooru}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: lingooru-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+    volumes:
+      - minio_data:/data
+    networks:
+      - lingooru
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  lingooru:
+    driver: bridge
