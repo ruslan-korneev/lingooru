@@ -2,11 +2,11 @@ from uuid import UUID
 
 from aiogram import F, Router
 from aiogram.enums import ParseMode
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
+from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
+from sqlalchemy.exc import SQLAlchemyError
 
 from src.bot.keyboards.learn import (
     get_learning_card_keyboard,
@@ -14,47 +14,20 @@ from src.bot.keyboards.learn import (
     get_word_added_keyboard,
     get_word_not_found_keyboard,
 )
-from src.bot.utils.flags import get_flag
+from src.bot.utils import get_flag, get_language_pair, parse_callback_param, safe_edit_or_send
 from src.core.exceptions import ConflictError
 from src.db.session import AsyncSessionMaker
 from src.modules.srs.services import SRSService
 from src.modules.users.dto import UserReadDTO
-from src.modules.users.models import LanguagePair
 from src.modules.vocabulary.models import Language
 from src.modules.vocabulary.services import VocabularyService
 
 router = Router(name="learn")
 
 
-async def _safe_edit_or_send(
-    message: Message,
-    text: str,
-    reply_markup: InlineKeyboardMarkup | None = None,
-    parse_mode: str | None = None,
-) -> None:
-    """Edit message text, or delete and send new if message is audio."""
-    try:
-        await message.edit_text(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
-    except TelegramBadRequest as e:
-        if "no text in the message" in str(e):
-            await message.delete()
-            await message.answer(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
-        else:
-            raise
-
-
 class LearnStates(StatesGroup):
     waiting_for_translation = State()
     learning_session = State()
-
-
-def get_language_pair(pair: LanguagePair) -> tuple[Language, Language]:
-    """Convert LanguagePair to source and target languages."""
-    match pair:
-        case LanguagePair.EN_RU:
-            return Language.EN, Language.RU
-        case LanguagePair.KO_RU:
-            return Language.KO, Language.RU
 
 
 @router.callback_query(F.data == "learn:start")
@@ -81,7 +54,7 @@ async def on_learn_start(
 
     if unlearned_count == 0:
         # No words for current language pair - redirect to add words
-        await _safe_edit_or_send(
+        await safe_edit_or_send(
             message,
             text=i18n.get("learn-no-words-for-pair"),
             reply_markup=get_word_not_found_keyboard(i18n),
@@ -115,7 +88,7 @@ async def on_learn_language_selected(
     if not isinstance(message, Message):
         return
 
-    lang_code = callback.data.split(":")[2]  # "en", "ko", or "mix"
+    lang_code = parse_callback_param(callback.data, 2)  # "en", "ko", or "mix"
 
     source_language: Language | None = None
     if lang_code == "en":
@@ -154,7 +127,7 @@ async def _start_learning_session(
         )
 
     if not words:
-        await _safe_edit_or_send(
+        await safe_edit_or_send(
             message,
             text=i18n.get("learn-no-words"),
             reply_markup=get_word_not_found_keyboard(i18n),
@@ -186,7 +159,7 @@ async def _start_learning_session(
         example=example_text,
     )
 
-    await _safe_edit_or_send(
+    await safe_edit_or_send(
         message,
         text=text,
         reply_markup=get_learning_card_keyboard(i18n, word_id=word.word.id),
@@ -212,7 +185,7 @@ async def on_learn_action(
     if not isinstance(message, Message):
         return
 
-    action = callback.data.split(":")[1]
+    action = parse_callback_param(callback.data, 1)
     data = await state.get_data()
     words = data.get("learning_words", [])
     current_index = data.get("current_index", 0)
@@ -245,7 +218,7 @@ async def on_learn_action(
     if next_index >= len(words):
         # Session complete
         await state.clear()
-        await _safe_edit_or_send(
+        await safe_edit_or_send(
             message,
             text=i18n.get("learn-session-complete", count=len(words)),
             reply_markup=get_learning_complete_keyboard(i18n),
@@ -275,7 +248,7 @@ async def on_learn_action(
 
     word_id = UUID(word_data["id"])
 
-    await _safe_edit_or_send(
+    await safe_edit_or_send(
         message,
         text=text,
         reply_markup=get_learning_card_keyboard(i18n, word_id=word_id),
@@ -288,7 +261,6 @@ async def on_learn_action(
 async def on_word_add_prompt(
     callback: CallbackQuery,
     i18n: I18nContext,
-    db_user: UserReadDTO,  # noqa: ARG001
 ) -> None:
     """Prompt user to add a word."""
     if not callback.message:
@@ -298,7 +270,7 @@ async def on_word_add_prompt(
     if not isinstance(message, Message):
         return
 
-    await _safe_edit_or_send(
+    await safe_edit_or_send(
         message,
         text=i18n.get("word-add-prompt"),
     )
@@ -352,6 +324,6 @@ async def on_translation_input(
         except ConflictError:
             await state.clear()
             await message.answer(text=i18n.get("word-already-exists"))
-        except Exception:
+        except SQLAlchemyError:
             await state.clear()
             await message.answer(text=i18n.get("word-add-error"))

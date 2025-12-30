@@ -3,6 +3,8 @@
 from uuid import UUID
 
 import httpx
+from botocore.exceptions import BotoCoreError, ClientError
+from gtts.tts import gTTSError
 from loguru import logger
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -92,7 +94,7 @@ class AudioService:
                 audio_source="gtts",
             )
 
-        except Exception as e:
+        except (gTTSError, ClientError, BotoCoreError) as e:
             logger.error(f"Failed to generate audio for word {word.id}: {e}")
             return None
         else:
@@ -119,6 +121,6 @@ class AudioService:
         except httpx.HTTPStatusError as e:
             logger.error(f"Failed to download audio: HTTP {e.response.status_code}")
             return None
-        except Exception as e:
+        except httpx.HTTPError as e:
             logger.error(f"Failed to download audio from {url}: {e}")
             return None

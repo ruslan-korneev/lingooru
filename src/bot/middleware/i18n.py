@@ -11,11 +11,12 @@ if TYPE_CHECKING:
 class UserLocaleManager(BaseManager):
     async def get_locale(
         self,
-        event: TelegramObject,  # noqa: ARG002
+        event: TelegramObject,
         event_from_user: TelegramUser | None = None,
         db_user: "UserReadDTO | None" = None,
-        **_kwargs: Any,
+        **kwargs: Any,
     ) -> str:
+        _ = event, kwargs
         if db_user:
             return db_user.ui_language.value
 
@@ -29,7 +30,7 @@ class UserLocaleManager(BaseManager):
         self,
         locale: str,
         event: TelegramObject | None = None,
-        **_kwargs: Any,
+        **kwargs: Any,
     ) -> None:
         # Locale is already saved to DB in the handler
-        pass
+        _ = locale, event, kwargs

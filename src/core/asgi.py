@@ -1,6 +1,6 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, cast
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -107,8 +107,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: ARG001
+async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions."""
+    _ = exc
     return JSONResponse(
         status_code=500,
         content=_build_error_response(
@@ -146,9 +147,10 @@ def get_app() -> FastAPIWrapper:
     app.container = container
 
     # Register exception handlers
-    app.add_exception_handler(AppError, app_exception_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(Exception, generic_exception_handler)
+    # cast to Any because FastAPI's type hints are overly strict for exception handlers
+    app.add_exception_handler(AppError, cast(Any, app_exception_handler))
+    app.add_exception_handler(RequestValidationError, cast(Any, validation_exception_handler))
+    app.add_exception_handler(Exception, cast(Any, generic_exception_handler))
 
     # Middleware order: last added runs first on request
     # 1. CORS (innermost - handles preflight)

@@ -1,7 +1,5 @@
 """Audio handler for playing word pronunciations."""
 
-from uuid import UUID
-
 from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import BufferedInputFile, CallbackQuery, InlineKeyboardMarkup, Message
@@ -11,9 +9,9 @@ from loguru import logger
 from src.bot.keyboards.learn import get_learning_card_keyboard
 from src.bot.keyboards.review import get_review_rating_keyboard
 from src.bot.keyboards.voice import get_voice_prompt_keyboard
+from src.bot.utils import parse_callback_param, parse_callback_uuid
 from src.db.session import AsyncSessionMaker
 from src.modules.audio.services import AudioService
-from src.modules.users.dto import UserReadDTO
 
 router = Router(name="audio")
 
@@ -36,7 +34,6 @@ def _get_keyboard_for_context(
 async def on_audio_play(
     callback: CallbackQuery,
     i18n: I18nContext,
-    db_user: UserReadDTO,  # noqa: ARG001
 ) -> None:
     """Handle audio play request."""
     if not callback.data or not callback.message:
@@ -47,18 +44,11 @@ async def on_audio_play(
         return
 
     # Parse callback: audio:play:{context}:{word_id}
-    expected_parts = 4
-    parts = callback.data.split(":")
-    if len(parts) != expected_parts:
-        await callback.answer(i18n.get("audio-error"), show_alert=True)
-        return
+    context = parse_callback_param(callback.data, 2)  # learn, review, voice
+    word_id = parse_callback_uuid(callback.data, 3)
 
-    context = parts[2]  # learn, review, voice
-
-    try:
-        word_id = UUID(parts[3])
-    except ValueError:
-        logger.error(f"Invalid word_id in callback: {callback.data}")
+    if not context or not word_id:
+        logger.error(f"Invalid callback data: {callback.data}")
         await callback.answer(i18n.get("audio-error"), show_alert=True)
         return
 
@@ -87,8 +77,5 @@ async def on_audio_play(
         audio_file = BufferedInputFile(audio_bytes, filename="pronunciation.mp3")
         await message.answer_audio(audio_file, caption=caption, reply_markup=keyboard)
     except TelegramBadRequest as e:
-        logger.error(f"Failed to send audio: {e}")
-        await callback.answer(i18n.get("audio-error"), show_alert=True)
-    except Exception as e:
         logger.error(f"Failed to send audio: {e}")
         await callback.answer(i18n.get("audio-error"), show_alert=True)

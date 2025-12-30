@@ -2,12 +2,13 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
 
-from src.bot.handlers.learn import get_language_pair
+from src.bot.keyboards.menu import get_main_menu_keyboard
 from src.bot.keyboards.word_lists import (
     get_list_added_keyboard,
     get_word_list_preview_keyboard,
     get_word_lists_keyboard,
 )
+from src.bot.utils import get_language_pair, parse_callback_param
 from src.core.exceptions import ConflictError
 from src.db.session import AsyncSessionMaker
 from src.modules.users.dto import UserReadDTO
@@ -42,8 +43,6 @@ async def on_lists_show(
     ui_lang = db_user.ui_language.value
 
     if not word_lists:
-        from src.bot.keyboards.menu import get_main_menu_keyboard
-
         await message.edit_text(
             text=i18n.get("lists-empty"),
             reply_markup=get_main_menu_keyboard(i18n),
@@ -77,10 +76,10 @@ async def on_list_preview(
     if not isinstance(message, Message):
         return
 
-    list_id = callback.data.split(":")[2]
+    list_id = parse_callback_param(callback.data, 2)
     word_list = get_word_list_by_id(list_id)
 
-    if not word_list:
+    if not list_id or not word_list:
         await callback.answer(i18n.get("list-not-found"), show_alert=True)
         return
 
@@ -128,10 +127,10 @@ async def on_list_add(
     if not isinstance(message, Message):
         return
 
-    list_id = callback.data.split(":")[2]
+    list_id = parse_callback_param(callback.data, 2)
     word_list = get_word_list_by_id(list_id)
 
-    if not word_list:
+    if not list_id or not word_list:
         await callback.answer(i18n.get("list-not-found"), show_alert=True)
         return
 

@@ -93,17 +93,15 @@ extend-exclude = [".venv", "venv", "migrations", "private"]
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "D",
-    "ANN",
-    "BLE001",
-    "FBT003",
-    "PLR0913",
-    "S101",
-    "COM812",
-    "ISC001",
-    "N806", # Variable `UpperCase` in function should be lowercase
-    "UP037",
-    "PGH003",
+    "D",      # Docstrings - not enforced
+    "ANN",    # Type annotations - covered by mypy strict
+    "FBT003", # Boolean positional args - acceptable in this codebase
+    "PLR0913",# Too many arguments - acceptable for some functions
+    "S101",   # Use of assert - allowed in non-test code
+    "COM812", # Trailing comma - conflicts with formatter
+    "ISC001", # Implicit string concat - conflicts with formatter
+    "N806",   # Variable `UpperCase` in function should be lowercase
+    "UP037",  # Remove quotes from type annotation - Python 3.13 deprecation
 ]
 external = [ "WPS" ]
 
@@ -141,7 +139,7 @@ warn_no_return = true
 namespace_packages = true
 explicit_package_bases = true
 disallow_untyped_defs = true
-disallow_untyped_calls = false
+disallow_untyped_calls = true
 strict = true
 strict_equality = true
 
@@ -150,7 +148,11 @@ module = ["asyncpg", "asyncpg.exceptions"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["gtts", "aioboto3"]
+module = ["gtts", "gtts.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "aioboto3"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

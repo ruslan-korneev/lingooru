@@ -1,52 +1,33 @@
 """Voice handler for pronunciation practice sessions."""
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from io import BytesIO
 from uuid import UUID
 
 from aiogram import F, Router
-
-if TYPE_CHECKING:
-    from io import BytesIO
 from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
+from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
+from httpx import HTTPError
 from loguru import logger
+from sqlalchemy.exc import SQLAlchemyError
 
-from src.bot.handlers.learn import get_language_pair
 from src.bot.keyboards.voice import (
     get_voice_complete_keyboard,
     get_voice_no_words_keyboard,
     get_voice_prompt_keyboard,
     get_voice_result_keyboard,
 )
-from src.bot.utils.flags import get_flag
+from src.bot.utils import get_flag, get_language_pair, safe_edit_or_send
 from src.db.session import AsyncSessionMaker
 from src.modules.users.dto import UserReadDTO
 from src.modules.vocabulary.models import Language
 from src.modules.voice.services import VoiceService
 
 router = Router(name="voice")
-
-
-async def _safe_edit_or_send(
-    message: Message,
-    text: str,
-    reply_markup: InlineKeyboardMarkup | None = None,
-    parse_mode: str | None = None,
-) -> None:
-    """Edit message text, or delete and send new if message is audio."""
-    try:
-        await message.edit_text(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
-    except TelegramBadRequest as e:
-        if "no text in the message" in str(e):
-            await message.delete()
-            await message.answer(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
-        else:
-            raise
 
 
 class VoiceStates(StatesGroup):
@@ -85,7 +66,7 @@ async def on_voice_start(
         )
 
     if not words:
-        await _safe_edit_or_send(
+        await safe_edit_or_send(
             message,
             text=i18n.get("voice-no-words"),
             reply_markup=get_voice_no_words_keyboard(i18n),
@@ -130,7 +111,7 @@ async def _show_word_prompt(
         phonetic=phonetic_text,
     )
 
-    await _safe_edit_or_send(
+    await safe_edit_or_send(
         message,
         text=text,
         reply_markup=get_voice_prompt_keyboard(i18n, word_id=word_id),
@@ -177,7 +158,14 @@ async def on_voice_message(
             )
             return
 
-        file_data: BytesIO = await message.bot.download_file(file.file_path)  # type: ignore[assignment]
+        file_data = await message.bot.download_file(file.file_path)
+        if not isinstance(file_data, BytesIO):
+            await state.set_state(VoiceStates.waiting_for_voice)
+            await processing_msg.edit_text(
+                text=i18n.get("voice-error"),
+                reply_markup=get_voice_prompt_keyboard(i18n),
+            )
+            return
         audio_bytes = file_data.read()
 
         # Process pronunciation
@@ -215,7 +203,7 @@ async def on_voice_message(
             parse_mode=ParseMode.HTML,
         )
 
-    except Exception as e:
+    except (TelegramBadRequest, HTTPError, SQLAlchemyError) as e:
         logger.error(f"Voice processing error: {e}")
         await state.set_state(VoiceStates.waiting_for_voice)
         await processing_msg.edit_text(
@@ -267,7 +255,6 @@ async def on_voice_retry(
 async def on_voice_next(
     callback: CallbackQuery,
     i18n: I18nContext,
-    db_user: UserReadDTO,  # noqa: ARG001
     state: FSMContext,
 ) -> None:
     """Move to next word or complete session."""
@@ -300,7 +287,7 @@ async def on_voice_next(
             time_minutes = max(1, stats.time_spent_seconds // 60)
 
             await state.clear()
-            await _safe_edit_or_send(
+            await safe_edit_or_send(
                 message,
                 text=i18n.get(
                     "voice-complete",
@@ -312,7 +299,7 @@ async def on_voice_next(
             )
         else:
             await state.clear()
-            await _safe_edit_or_send(
+            await safe_edit_or_send(
                 message,
                 text=i18n.get("voice-session-ended"),
                 reply_markup=get_voice_complete_keyboard(i18n),

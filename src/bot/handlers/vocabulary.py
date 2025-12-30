@@ -3,13 +3,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
 
-from src.bot.handlers.learn import LearnStates, get_language_pair
+from src.bot.constants import LEARN_BUTTONS, MENU_BUTTONS, REVIEW_BUTTONS
+from src.bot.handlers.learn import LearnStates
 from src.bot.keyboards.learn import get_word_added_keyboard
 from src.bot.keyboards.vocabulary import (
     get_vocabulary_keyboard,
     get_vocabulary_pagination_keyboard,
 )
-from src.bot.utils.flags import get_flag
+from src.bot.utils import get_flag, get_language_pair, parse_callback_int, parse_callback_param
 from src.core.exceptions import ConflictError
 from src.db.session import AsyncSessionMaker
 from src.modules.users.dto import UserReadDTO
@@ -46,7 +47,7 @@ async def on_vocab_page(
     if not callback.data:
         return
 
-    page = int(callback.data.split(":")[2])
+    page = parse_callback_int(callback.data, 2)
     await show_vocabulary_page(callback, i18n, db_user, state, page=page)
 
 
@@ -61,7 +62,7 @@ async def on_vocab_filter(
     if not callback.data:
         return
 
-    filter_code = callback.data.split(":")[2]  # "all", "en", "ko"
+    filter_code = parse_callback_param(callback.data, 2)  # "all", "en", "ko"
 
     source_filter: Language | None = None
     if filter_code == "en":
@@ -161,8 +162,6 @@ async def on_text_input(
         return
 
     # Skip if it's a menu button
-    from src.bot.handlers.menu import LEARN_BUTTONS, MENU_BUTTONS, REVIEW_BUTTONS
-
     if text in MENU_BUTTONS | LEARN_BUTTONS | REVIEW_BUTTONS:
         return
 

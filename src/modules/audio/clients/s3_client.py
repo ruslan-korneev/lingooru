@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
 import aioboto3
+from botocore.exceptions import BotoCoreError, ClientError
 from loguru import logger
 
 from src.config import settings
@@ -56,7 +57,7 @@ class S3Client:
                     ContentType=content_type,
                 )
             return self._get_public_url(key)
-        except Exception as e:
+        except (ClientError, BotoCoreError) as e:
             logger.error(f"S3 upload failed for key '{key}': {e}")
             raise
 
@@ -68,7 +69,7 @@ class S3Client:
                     Bucket=settings.s3.bucket_name,
                     Key=key,
                 )
-        except Exception:
+        except (ClientError, BotoCoreError):
             return False
         else:
             return True
@@ -83,7 +84,7 @@ class S3Client:
                 )
                 async with response["Body"] as stream:
                     return await stream.read()
-        except Exception as e:
+        except (ClientError, BotoCoreError) as e:
             logger.error(f"S3 download failed for key '{key}': {e}")
             return None
 
@@ -95,7 +96,7 @@ class S3Client:
                     Bucket=settings.s3.bucket_name,
                     Key=key,
                 )
-        except Exception as e:
+        except (ClientError, BotoCoreError) as e:
             logger.error(f"S3 delete failed for key '{key}': {e}")
             raise
 

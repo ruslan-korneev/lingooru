@@ -9,6 +9,7 @@ from src.bot.keyboards.menu import (
     get_main_menu_keyboard,
     get_pair_selection_keyboard,
 )
+from src.bot.utils import parse_callback_param
 from src.db.session import AsyncSessionMaker
 from src.modules.users.dto import UserReadDTO, UserUpdateDTO
 from src.modules.users.models import LanguagePair, UILanguage
@@ -21,7 +22,6 @@ router = Router(name="start")
 async def cmd_start(
     message: Message,
     i18n: I18nContext,
-    db_user: UserReadDTO,  # noqa: ARG001
 ) -> None:
     # Show language selection for all /start commands
     # Users can change settings from main menu later
@@ -44,7 +44,7 @@ async def on_language_selected(
     if not isinstance(message, Message):
         return
 
-    lang_code = callback.data.split(":")[-1]
+    lang_code = parse_callback_param(callback.data, 2)
 
     # Update user language in database
     async with AsyncSessionMaker() as session:
@@ -79,7 +79,7 @@ async def on_pair_selected(
     if not isinstance(message, Message):
         return
 
-    pair_code = callback.data.split(":")[-1]
+    pair_code = parse_callback_param(callback.data, 2)
 
     # Update user language pair in database
     async with AsyncSessionMaker() as session:

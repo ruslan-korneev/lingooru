@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
@@ -12,6 +12,9 @@ from src.modules.users.repositories import UserRepository
 from src.modules.users.services import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+# Sentinel for dependency injection - typed as Any to avoid type errors with None default
+_INJECTED: Any = None
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -36,7 +39,7 @@ async def list_users(
     db_session_maker: Annotated[
         AsyncSessionMaker,
         Depends(Provide[Container.db_session_maker]),
-    ] = None,  # type: ignore[assignment]
+    ] = _INJECTED,
 ) -> PaginatedResponse[UserReadDTO]:
     """List all users with pagination."""
     async with db_session_maker as session:

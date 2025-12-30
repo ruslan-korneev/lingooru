@@ -5,6 +5,7 @@ import io
 from typing import ClassVar
 
 from gtts import gTTS
+from gtts.tts import gTTSError
 from loguru import logger
 
 
@@ -43,7 +44,7 @@ class GTTSClient:
             tts.write_to_fp(buffer)
             buffer.seek(0)
             return buffer.read()
-        except Exception as e:
+        except gTTSError as e:
             logger.error(f"gTTS generation failed for '{text}' ({language}): {e}")
             raise
 

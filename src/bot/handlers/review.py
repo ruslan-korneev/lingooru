@@ -5,41 +5,23 @@ from uuid import UUID
 
 from aiogram import F, Router
 from aiogram.enums import ParseMode
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
+from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
 
-from src.bot.handlers.learn import get_language_pair
 from src.bot.keyboards.review import (
     get_review_complete_keyboard,
     get_review_rating_keyboard,
     get_review_show_answer_keyboard,
     get_review_start_keyboard,
 )
+from src.bot.utils import get_language_pair, parse_callback_int, safe_edit_or_send
 from src.db.session import AsyncSessionMaker
 from src.modules.srs.services import SRSService
 from src.modules.users.dto import UserReadDTO
 
 router = Router(name="review")
-
-
-async def _safe_edit_or_send(
-    message: Message,
-    text: str,
-    reply_markup: InlineKeyboardMarkup | None = None,
-    parse_mode: str | None = None,
-) -> None:
-    """Edit message text, or delete and send new if message is audio."""
-    try:
-        await message.edit_text(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
-    except TelegramBadRequest as e:
-        if "no text in the message" in str(e):
-            await message.delete()
-            await message.answer(text=text, reply_markup=reply_markup, parse_mode=parse_mode)
-        else:
-            raise
 
 
 class ReviewStates(StatesGroup):
@@ -72,7 +54,7 @@ async def on_review_start(
         due_count = await service.count_due_reviews(db_user.id)
 
     if due_count == 0:
-        await _safe_edit_or_send(
+        await safe_edit_or_send(
             message,
             text=i18n.get("review-no-words-due"),
             reply_markup=get_review_complete_keyboard(i18n),
@@ -80,7 +62,7 @@ async def on_review_start(
         await callback.answer()
         return
 
-    await _safe_edit_or_send(
+    await safe_edit_or_send(
         message,
         text=i18n.get("review-start", count=due_count),
         reply_markup=get_review_start_keyboard(i18n),
@@ -114,7 +96,7 @@ async def on_review_begin(
         )
 
     if not reviews:
-        await _safe_edit_or_send(
+        await safe_edit_or_send(
             message,
             text=i18n.get("review-no-words-due"),
             reply_markup=get_review_complete_keyboard(i18n),
@@ -133,7 +115,7 @@ async def on_review_begin(
 
     # Show first question (translation prompt)
     review = reviews[0]
-    await _safe_edit_or_send(
+    await safe_edit_or_send(
         message,
         text=i18n.get(
             "review-question",
@@ -150,7 +132,6 @@ async def on_review_begin(
 async def on_review_show_answer(
     callback: CallbackQuery,
     i18n: I18nContext,
-    db_user: UserReadDTO,  # noqa: ARG001
     state: FSMContext,
 ) -> None:
     """Show the answer (word + phonetic) and rating buttons."""
@@ -177,7 +158,7 @@ async def on_review_show_answer(
     example_text = f'\n\n"{review_data["example_sentence"]}"' if review_data.get("example_sentence") else ""
     word_id = UUID(review_data["word_id"]) if review_data.get("word_id") else None
 
-    await _safe_edit_or_send(
+    await safe_edit_or_send(
         message,
         text=i18n.get(
             "review-answer",
@@ -197,7 +178,6 @@ async def on_review_show_answer(
 async def on_review_rate(
     callback: CallbackQuery,
     i18n: I18nContext,
-    db_user: UserReadDTO,  # noqa: ARG001
     state: FSMContext,
 ) -> None:
     """Handle quality rating and move to next word."""
@@ -208,7 +188,7 @@ async def on_review_rate(
     if not isinstance(message, Message):
         return
 
-    quality = int(callback.data.split(":")[2])  # 1-5
+    quality = parse_callback_int(callback.data, 2)  # 1-5
     data = await state.get_data()
     reviews = data.get("reviews", [])
     current_index = data.get("current_index", 0)
@@ -245,7 +225,7 @@ async def on_review_rate(
         # Calculate time in minutes
         time_minutes = max(1, stats.time_spent_seconds // 60)
 
-        await _safe_edit_or_send(
+        await safe_edit_or_send(
             message,
             text=i18n.get(
                 "review-complete",
@@ -263,7 +243,7 @@ async def on_review_rate(
     await state.set_state(ReviewStates.reviewing)
 
     next_review = reviews[next_index]
-    await _safe_edit_or_send(
+    await safe_edit_or_send(
         message,
         text=i18n.get(
             "review-question",
