@@ -29,7 +29,7 @@ def create_bot() -> Bot:
     )
 
 
-def create_dispatcher() -> Dispatcher:
+def create_dispatcher() -> tuple[Dispatcher, I18nMiddleware]:
     dp = Dispatcher()
 
     # Include routers (order matters - more specific first)
@@ -58,7 +58,7 @@ def create_dispatcher() -> Dispatcher:
     )
     i18n_middleware.setup(dispatcher=dp)
 
-    return dp
+    return dp, i18n_middleware
 
 
 class _BotHolder:
@@ -66,6 +66,7 @@ class _BotHolder:
 
     _bot: Bot | None = None
     _dispatcher: Dispatcher | None = None
+    _i18n_middleware: I18nMiddleware | None = None
 
     @classmethod
     def get_bot(cls) -> Bot:
@@ -76,8 +77,14 @@ class _BotHolder:
     @classmethod
     def get_dispatcher(cls) -> Dispatcher:
         if cls._dispatcher is None:
-            cls._dispatcher = create_dispatcher()
+            cls._dispatcher, cls._i18n_middleware = create_dispatcher()
         return cls._dispatcher
+
+    @classmethod
+    def get_i18n_middleware(cls) -> I18nMiddleware:
+        if cls._i18n_middleware is None:
+            cls._dispatcher, cls._i18n_middleware = create_dispatcher()
+        return cls._i18n_middleware
 
 
 def get_bot() -> Bot:
@@ -86,3 +93,7 @@ def get_bot() -> Bot:
 
 def get_dispatcher() -> Dispatcher:
     return _BotHolder.get_dispatcher()
+
+
+def get_i18n_middleware() -> I18nMiddleware:
+    return _BotHolder.get_i18n_middleware()

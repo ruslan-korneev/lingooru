@@ -187,10 +187,13 @@ class TestLifespan:
         """Lifespan creates bot but doesn't set webhook when webhook_url is empty."""
         app = MagicMock()
         mock_bot = AsyncMock()
+        mock_i18n = MagicMock()
+        mock_i18n.core = AsyncMock()
 
         with (
             patch("src.core.asgi.settings") as mock_settings,
             patch("src.bot.dispatcher.get_bot", return_value=mock_bot),
+            patch("src.bot.dispatcher.get_i18n_middleware", return_value=mock_i18n),
         ):
             mock_settings.telegram.bot_token.get_secret_value.return_value = "test-token"
             mock_settings.telegram.webhook_url = ""
@@ -198,6 +201,7 @@ class TestLifespan:
             async with lifespan(app):
                 pass
 
+            mock_i18n.core.startup.assert_called_once()
             mock_bot.set_webhook.assert_not_called()
             mock_bot.session.close.assert_called_once()
 
@@ -205,10 +209,13 @@ class TestLifespan:
         """Lifespan sets and deletes webhook when webhook_url is provided."""
         app = MagicMock()
         mock_bot = AsyncMock()
+        mock_i18n = MagicMock()
+        mock_i18n.core = AsyncMock()
 
         with (
             patch("src.core.asgi.settings") as mock_settings,
             patch("src.bot.dispatcher.get_bot", return_value=mock_bot),
+            patch("src.bot.dispatcher.get_i18n_middleware", return_value=mock_i18n),
         ):
             mock_settings.telegram.bot_token.get_secret_value.return_value = "test-token"
             mock_settings.telegram.webhook_url = "https://example.com"
@@ -217,6 +224,7 @@ class TestLifespan:
             async with lifespan(app):
                 mock_bot.set_webhook.assert_called_once()
 
+            mock_i18n.core.startup.assert_called_once()
             mock_bot.delete_webhook.assert_called_once()
             mock_bot.session.close.assert_called_once()
 
@@ -224,10 +232,13 @@ class TestLifespan:
         """Lifespan sets webhook without secret token when secret is empty."""
         app = MagicMock()
         mock_bot = AsyncMock()
+        mock_i18n = MagicMock()
+        mock_i18n.core = AsyncMock()
 
         with (
             patch("src.core.asgi.settings") as mock_settings,
             patch("src.bot.dispatcher.get_bot", return_value=mock_bot),
+            patch("src.bot.dispatcher.get_i18n_middleware", return_value=mock_i18n),
         ):
             mock_settings.telegram.bot_token.get_secret_value.return_value = "test-token"
             mock_settings.telegram.webhook_url = "https://example.com"

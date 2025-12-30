@@ -58,6 +58,7 @@ class TestBotHolder:
         """Reset singleton before each test."""
         _BotHolder._bot = None  # noqa: SLF001
         _BotHolder._dispatcher = None  # noqa: SLF001
+        _BotHolder._i18n_middleware = None  # noqa: SLF001
 
     def test_get_bot_creates_bot_on_first_call(self) -> None:
         """get_bot creates bot on first call."""
@@ -87,7 +88,8 @@ class TestBotHolder:
         """get_dispatcher creates dispatcher on first call."""
         with patch("src.bot.dispatcher.create_dispatcher") as mock_create:
             mock_dp = MagicMock()
-            mock_create.return_value = mock_dp
+            mock_i18n = MagicMock()
+            mock_create.return_value = (mock_dp, mock_i18n)
 
             result = _BotHolder.get_dispatcher()
 
@@ -98,7 +100,8 @@ class TestBotHolder:
         """get_dispatcher returns cached dispatcher on subsequent calls."""
         with patch("src.bot.dispatcher.create_dispatcher") as mock_create:
             mock_dp = MagicMock()
-            mock_create.return_value = mock_dp
+            mock_i18n = MagicMock()
+            mock_create.return_value = (mock_dp, mock_i18n)
 
             result1 = _BotHolder.get_dispatcher()
             result2 = _BotHolder.get_dispatcher()
@@ -115,6 +118,7 @@ class TestModuleFunctions:
         """Reset singleton before each test."""
         _BotHolder._bot = None  # noqa: SLF001
         _BotHolder._dispatcher = None  # noqa: SLF001
+        _BotHolder._i18n_middleware = None  # noqa: SLF001
 
     def test_get_bot_uses_holder(self) -> None:
         """get_bot uses _BotHolder."""
