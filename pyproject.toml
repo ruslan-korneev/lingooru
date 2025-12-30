@@ -168,7 +168,7 @@ filterwarnings = [
 
 [tool.coverage.run]
 parallel = true
-omit = ["**/tests/*", "src/core/*"]
+omit = ["**/tests/*"]
 
 [tool.coverage-threshold]
 line_coverage_min = 80
