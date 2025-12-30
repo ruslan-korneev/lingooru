@@ -3,7 +3,10 @@
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
+from botocore.exceptions import ClientError
+from gtts.tts import gTTSError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.audio.services import AudioService
@@ -169,3 +172,79 @@ class TestAudioService:
         result = await audio_service._generate_and_cache(word)  # noqa: SLF001
 
         assert result is None
+
+    @pytest.mark.asyncio
+    async def test_generate_and_cache_returns_none_on_gtts_error(
+        self,
+        audio_service: AudioService,
+        sample_word: Word,
+    ) -> None:
+        """Test that gTTS error returns None."""
+        with patch.object(audio_service, "_gtts") as mock_gtts:
+            mock_gtts.generate = AsyncMock(side_effect=gTTSError("API error"))
+
+            result = await audio_service._generate_and_cache(sample_word)  # noqa: SLF001
+
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_generate_and_cache_returns_none_on_client_error(
+        self,
+        audio_service: AudioService,
+        sample_word: Word,
+    ) -> None:
+        """Test that S3 ClientError returns None."""
+        with (
+            patch.object(audio_service, "_gtts") as mock_gtts,
+            patch.object(audio_service, "_s3") as mock_s3,
+        ):
+            mock_gtts.generate = AsyncMock(return_value=b"audio data")
+            mock_s3.upload_audio = AsyncMock(
+                side_effect=ClientError(
+                    {"Error": {"Code": "500", "Message": "Internal"}},
+                    "PutObject",
+                )
+            )
+
+            result = await audio_service._generate_and_cache(sample_word)  # noqa: SLF001
+
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_download_audio_returns_none_on_http_status_error(
+        self,
+        audio_service: AudioService,
+    ) -> None:
+        """Test that HTTP status error returns None."""
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+
+        with patch("src.modules.audio.services.httpx.AsyncClient") as mock_client:
+            mock_instance = AsyncMock()
+            mock_client.return_value.__aenter__.return_value = mock_instance
+            mock_instance.get = AsyncMock(
+                side_effect=httpx.HTTPStatusError(
+                    "Not Found",
+                    request=MagicMock(),
+                    response=mock_response,
+                )
+            )
+
+            result = await audio_service._download_audio("http://example.com/audio.mp3")  # noqa: SLF001
+
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_download_audio_returns_none_on_http_error(
+        self,
+        audio_service: AudioService,
+    ) -> None:
+        """Test that generic HTTP error returns None."""
+        with patch("src.modules.audio.services.httpx.AsyncClient") as mock_client:
+            mock_instance = AsyncMock()
+            mock_client.return_value.__aenter__.return_value = mock_instance
+            mock_instance.get = AsyncMock(side_effect=httpx.ConnectError("Connection failed"))
+
+            result = await audio_service._download_audio("http://example.com/audio.mp3")  # noqa: SLF001
+
+            assert result is None

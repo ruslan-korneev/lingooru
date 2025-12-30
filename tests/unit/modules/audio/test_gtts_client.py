@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from gtts.tts import gTTSError
 
 from src.modules.audio.clients.gtts_client import GTTSClient
 from src.modules.vocabulary.enums import Language
@@ -55,3 +56,12 @@ class TestGTTSClient:
 
             mock_gtts.assert_called_once_with(text="привет", lang="ru")
             assert result == b"russian audio"
+
+    @pytest.mark.asyncio
+    async def test_generate_raises_gtts_error(self, gtts_client: GTTSClient) -> None:
+        """Test gTTSError is re-raised after logging."""
+        with patch("src.modules.audio.clients.gtts_client.gTTS") as mock_gtts:
+            mock_gtts.side_effect = gTTSError("API error")
+
+            with pytest.raises(gTTSError):
+                await gtts_client.generate("hello", Language.EN)

@@ -3,6 +3,8 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
+from aiogram.exceptions import TelegramBadRequest
+
 from src.bot.handlers.audio import (
     _get_keyboard_for_context,
     on_audio_play,
@@ -148,3 +150,34 @@ class TestOnAudioPlay:
         mock_i18n.get.assert_any_call("audio-loading")
         mock_message.delete.assert_called_once()
         mock_message.answer_audio.assert_called_once()
+
+    async def test_handles_telegram_bad_request_on_send(
+        self,
+        mock_callback: MagicMock,
+        mock_i18n: MagicMock,
+        mock_message: MagicMock,
+    ) -> None:
+        """Handler handles TelegramBadRequest when sending audio."""
+        word_id = uuid4()
+        mock_callback.data = f"audio:play:learn:{word_id}"
+        mock_callback.message = mock_message
+        mock_message.text = "Hello - привет"
+        mock_message.delete = AsyncMock(side_effect=TelegramBadRequest(method=MagicMock(), message="Message not found"))
+
+        audio_bytes = b"audio data"
+
+        with patch("src.bot.handlers.audio.AsyncSessionMaker") as mock_session_maker:
+            mock_session = AsyncMock()
+            mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+            with patch("src.bot.handlers.audio.AudioService") as mock_service_class:
+                mock_service = mock_service_class.return_value
+                mock_service.get_audio_bytes = AsyncMock(return_value=audio_bytes)
+
+                with patch("src.bot.handlers.audio._get_keyboard_for_context") as mock_keyboard:
+                    mock_keyboard.return_value = MagicMock()
+
+                    await on_audio_play(mock_callback, mock_i18n)
+
+        mock_i18n.get.assert_any_call("audio-error")
+        mock_callback.answer.assert_called()
