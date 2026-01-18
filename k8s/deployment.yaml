@@ -17,6 +17,7 @@ spec:
       containers:
         - name: app
           image: ghcr.io/ruslan-korneev/lingooru:latest
+          args: ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
           ports:
             - containerPort: 8000
           envFrom:
