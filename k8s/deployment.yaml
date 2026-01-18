@@ -23,9 +23,7 @@ spec:
             - secretRef:
                 name: lingooru-secrets
           env:
-            # Override DB__HOST and S3__ENDPOINT_URL for K8s service names
-            - name: DB__HOST
-              value: "postgres"
+            # Override S3__ENDPOINT_URL for K8s service name
             - name: S3__ENDPOINT_URL
               value: "http://minio:9000"
           resources:
