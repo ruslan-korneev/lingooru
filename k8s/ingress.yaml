@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lingooru-app
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - lingooru.ruslan.beer
+      secretName: lingooru-tls
+  rules:
+    - host: lingooru.ruslan.beer
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lingooru-app
+                port:
+                  number: 80
