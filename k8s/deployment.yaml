@@ -12,6 +12,8 @@ spec:
       labels:
         app: lingooru-app
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: app
           image: ghcr.io/ruslan-korneev/lingooru:latest
