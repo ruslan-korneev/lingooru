@@ -12,6 +12,7 @@ from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
 from sentry_sdk.integrations.loguru import LoguruIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from starlette.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.config import settings
 from src.core.api import core_router
