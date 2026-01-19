@@ -11,8 +11,8 @@ from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
 from sentry_sdk.integrations.loguru import LoguruIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
+from starlette.middleware.cors import CORSMiddleware
 
 from src.config import settings
 from src.core.api import core_router
@@ -185,4 +185,8 @@ def get_app() -> FastAPIWrapper:
     app.add_middleware(RequestIDMiddleware)
 
     app.include_router(core_router)
+
+    # Prometheus metrics instrumentation
+    Instrumentator().instrument(app).expose(app, include_in_schema=False)
+
     return app
