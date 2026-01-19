@@ -6,6 +6,7 @@ import asyncio
 from loguru import logger
 
 from src.bot.bot_info import init_bot_info
+from src.bot.commands import set_bot_commands
 from src.bot.dispatcher import get_bot, get_dispatcher, get_i18n_middleware
 
 
@@ -20,6 +21,9 @@ async def main() -> None:
 
     # Initialize bot info (username, etc.)
     await init_bot_info(bot)
+
+    # Register bot commands in Telegram's menu
+    await set_bot_commands(bot)
 
     # Delete any existing webhook
     await bot.delete_webhook(drop_pending_updates=True)

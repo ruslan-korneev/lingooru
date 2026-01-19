@@ -1,4 +1,5 @@
 from aiogram import F, Router
+from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
 from loguru import logger
@@ -18,6 +19,21 @@ from src.modules.vocabulary.services import VocabularyService
 from src.modules.vocabulary.word_lists import get_word_lists_by_language
 
 router = Router(name="menu")
+
+
+@router.message(Command("menu"))
+async def cmd_menu(
+    message: Message,
+    i18n: I18nContext,
+    db_user: UserReadDTO,
+) -> None:
+    """Handle /menu command - show main menu."""
+    logger.debug(f"{__name__}:user:{db_user.username}")
+    text = await _build_menu_text(i18n, db_user)
+    await message.answer(
+        text=text,
+        reply_markup=get_main_menu_keyboard(i18n),
+    )
 
 
 @router.callback_query(F.data == "menu:main")

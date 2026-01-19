@@ -30,12 +30,14 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     # Startup
     if settings.telegram.bot_token.get_secret_value():
         from src.bot.bot_info import init_bot_info
+        from src.bot.commands import set_bot_commands
         from src.bot.dispatcher import get_bot, get_i18n_middleware
 
         bot = get_bot()
         i18n = get_i18n_middleware()
 
         await init_bot_info(bot)
+        await set_bot_commands(bot)
         await i18n.core.startup()
 
         if settings.telegram.webhook_url:
