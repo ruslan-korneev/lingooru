@@ -16,7 +16,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: app
-          image: ghcr.io/ruslan-korneev/lingooru:20260119155118-db59e5d # {"$imagepolicy": "flux-system:lingooru"}
+          image: ghcr.io/ruslan-korneev/lingooru:20260119161542-ab42738 # {"$imagepolicy": "flux-system:lingooru"}
           args: ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
           ports:
             - containerPort: 8000
