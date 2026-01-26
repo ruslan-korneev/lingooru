@@ -49,7 +49,7 @@ dev = [
     "pytest-httpx (>=0.35.0,<0.36.0)",
     "wemake-python-styleguide (>=1.0.0,<2.0.0)",
     "pre-commit>=4.2.0",
-    "types-aioboto3[s3] (>=13.0.0,<14.0.0)",
+    "types-aioboto3[s3] (>=13.0.0,<16.0.0)",
 ]
 plugins = [
     "click>=8.1",
