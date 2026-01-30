@@ -2,6 +2,36 @@
 
 from uuid import UUID
 
+from aiogram.types import CallbackQuery, Message
+
+# Callback data format: "action:subaction:value" (e.g., "settings:lang:en")
+# Index positions for standard callback patterns
+CALLBACK_ACTION_INDEX = 0
+CALLBACK_SUBACTION_INDEX = 1
+CALLBACK_VALUE_INDEX = 2
+
+
+def extract_callback_message(callback: CallbackQuery) -> Message | None:
+    """Extract and validate Message from CallbackQuery.
+
+    This helper handles the common pattern of validating callback data
+    and extracting the message in callback handlers.
+
+    Args:
+        callback: The callback query from aiogram.
+
+    Returns:
+        The Message object if valid, None otherwise.
+    """
+    if not callback.data or not callback.message:
+        return None
+
+    message = callback.message
+    if not isinstance(message, Message):
+        return None
+
+    return message
+
 
 def parse_callback_param(data: str | None, index: int, default: str = "") -> str:
     """Safely extract a parameter from callback data at the given index.

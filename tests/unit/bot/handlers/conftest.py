@@ -1,6 +1,6 @@
 """Fixtures for bot handler tests."""
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -11,6 +11,9 @@ from aiogram_i18n import I18nContext
 
 from src.modules.users.dto import UserReadDTO
 from src.modules.users.enums import LanguagePair, UILanguage
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 
 @pytest.fixture
@@ -102,3 +105,48 @@ def db_user() -> UserReadDTO:
         created_at=datetime.now(tz=UTC),
         updated_at=datetime.now(tz=UTC),
     )
+
+
+@pytest.fixture
+def mock_user_service(db_user: UserReadDTO) -> MagicMock:
+    """Create a mock UserService without patching.
+
+    This fixture only creates the mock service object.
+    For use with patched_user_service fixture.
+
+    Usage:
+        def test_something(mock_user_service):
+            # mock_user_service.update is already an AsyncMock
+            mock_user_service.update.return_value = some_user
+    """
+    mock_service = MagicMock()
+    mock_service.update = AsyncMock(return_value=db_user)
+    mock_service.get = AsyncMock(return_value=db_user)
+    mock_service.get_by_telegram_id = AsyncMock(return_value=db_user)
+    return mock_service
+
+
+@pytest.fixture
+def patched_start_user_service(
+    mock_user_service: MagicMock,
+) -> "Generator[MagicMock]":
+    """Patch AsyncSessionMaker and UserService for start handler tests.
+
+    This fixture patches both dependencies and yields the mock service
+    for assertions in tests.
+
+    Usage:
+        async def test_something(patched_start_user_service, mock_callback, ...):
+            patched_start_user_service.update.return_value = updated_user
+            await on_language_selected(...)
+            patched_start_user_service.update.assert_called_once()
+    """
+    from unittest.mock import patch
+
+    with patch("src.bot.handlers.start.AsyncSessionMaker") as mock_session_maker:
+        mock_session = AsyncMock()
+        mock_session_maker.return_value.__aenter__.return_value = mock_session
+
+        with patch("src.bot.handlers.start.UserService") as mock_service_class:
+            mock_service_class.return_value = mock_user_service
+            yield mock_user_service
