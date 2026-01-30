@@ -10,7 +10,13 @@ from src.bot.keyboards.menu import (
     get_main_menu_keyboard,
     get_pair_selection_keyboard,
 )
-from src.bot.utils import parse_callback_param
+from src.bot.utils import (
+    CALLBACK_VALUE_INDEX,
+    extract_callback_message,
+    format_greeting,
+    get_random_greeting,
+    parse_callback_param,
+)
 from src.db.session import AsyncSessionMaker
 from src.modules.users.dto import UserReadDTO, UserUpdateDTO
 from src.modules.users.enums import LanguagePair, UILanguage
@@ -37,8 +43,11 @@ async def cmd_start(
 
     # Show language selection for all /start commands
     # Users can change settings from main menu later
+    greeting = get_random_greeting()
+    greeting_text = format_greeting(greeting)
+
     await message.answer(
-        text=f"{i18n.get('welcome')}\n\n{i18n.get('welcome-choose-lang')}",
+        text=f"{greeting_text}\n\n{i18n.get('welcome')}\n\n{i18n.get('welcome-choose-lang')}",
         reply_markup=get_language_selection_keyboard(),
     )
 
@@ -49,14 +58,11 @@ async def on_language_selected(
     i18n: I18nContext,
     db_user: UserReadDTO,
 ) -> None:
-    if not callback.data or not callback.message:
+    message = extract_callback_message(callback)
+    if message is None:
         return
 
-    message = callback.message
-    if not isinstance(message, Message):
-        return
-
-    lang_code = parse_callback_param(callback.data, 2)
+    lang_code = parse_callback_param(callback.data, CALLBACK_VALUE_INDEX)
 
     # Update user language in database
     async with AsyncSessionMaker() as session:
@@ -84,14 +90,11 @@ async def on_pair_selected(
     i18n: I18nContext,
     db_user: UserReadDTO,
 ) -> None:
-    if not callback.data or not callback.message:
+    message = extract_callback_message(callback)
+    if message is None:
         return
 
-    message = callback.message
-    if not isinstance(message, Message):
-        return
-
-    pair_code = parse_callback_param(callback.data, 2)
+    pair_code = parse_callback_param(callback.data, CALLBACK_VALUE_INDEX)
 
     # Update user language pair in database
     async with AsyncSessionMaker() as session:

@@ -6,12 +6,12 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from loguru import logger
+from prometheus_fastapi_instrumentator import Instrumentator
 from sentry_sdk import init as sentry_init
 from sentry_sdk.integrations.asyncio import AsyncioIntegration
 from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
 from sentry_sdk.integrations.loguru import LoguruIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.middleware.cors import CORSMiddleware
 
 from src.config import settings
@@ -156,9 +156,9 @@ def get_app() -> FastAPIWrapper:
 
     # Register exception handlers
     # cast to Any because FastAPI's type hints are overly strict for exception handlers
-    app.add_exception_handler(AppError, cast(Any, app_exception_handler))
-    app.add_exception_handler(RequestValidationError, cast(Any, validation_exception_handler))
-    app.add_exception_handler(Exception, cast(Any, generic_exception_handler))
+    app.add_exception_handler(AppError, cast("Any", app_exception_handler))
+    app.add_exception_handler(RequestValidationError, cast("Any", validation_exception_handler))
+    app.add_exception_handler(Exception, cast("Any", generic_exception_handler))
 
     # Middleware order: last added runs first on request
     # 1. CORS (innermost - handles preflight)

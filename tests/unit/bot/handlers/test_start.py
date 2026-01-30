@@ -64,6 +64,29 @@ class TestCmdStart:
 
         mock_message.answer.assert_called_once()
 
+    async def test_includes_random_greeting(
+        self,
+        mock_message: MagicMock,
+        mock_i18n: MagicMock,
+        db_user: UserReadDTO,
+    ) -> None:
+        """Handler includes random greeting at start of message."""
+        from src.bot.constants import Greeting
+
+        mock_command = MagicMock()
+        mock_command.args = None
+
+        korean_greeting = Greeting("ko", "🇰🇷", "안녕하세요!", "Annyeonghaseyo!")
+
+        with patch("src.bot.handlers.start.get_random_greeting", return_value=korean_greeting):
+            await cmd_start(mock_message, mock_i18n, db_user, mock_command)
+
+        call_args = mock_message.answer.call_args
+        text = call_args.kwargs.get("text") or call_args.args[0]
+
+        assert text.startswith("🇰🇷 안녕하세요!")
+        assert "(Annyeonghaseyo!)" in text
+
 
 class TestOnLanguageSelected:
     """Tests for on_language_selected handler."""
@@ -115,22 +138,15 @@ class TestOnLanguageSelected:
         mock_i18n: MagicMock,
         db_user: UserReadDTO,
         mock_message: MagicMock,
+        patched_start_user_service: MagicMock,
     ) -> None:
         """Handler updates language and shows pair selection."""
         mock_callback.data = "settings:lang:en"
         mock_callback.message = mock_message
 
-        with patch("src.bot.handlers.start.AsyncSessionMaker") as mock_session_maker:
-            mock_session = AsyncMock()
-            mock_session_maker.return_value.__aenter__.return_value = mock_session
+        await on_language_selected(mock_callback, mock_i18n, db_user)
 
-            with patch("src.bot.handlers.start.UserService") as mock_service_class:
-                mock_service = mock_service_class.return_value
-                mock_service.update = AsyncMock()
-
-                await on_language_selected(mock_callback, mock_i18n, db_user)
-
-        mock_service.update.assert_called_once()
+        patched_start_user_service.update.assert_called_once()
         mock_i18n.set_locale.assert_called_with("en")
         mock_message.edit_text.assert_called_once()
         mock_callback.answer.assert_called_once()
@@ -186,24 +202,17 @@ class TestOnPairSelected:
         mock_i18n: MagicMock,
         db_user: UserReadDTO,
         mock_message: MagicMock,
+        patched_start_user_service: MagicMock,
     ) -> None:
         """Handler updates language pair and shows main menu."""
         mock_callback.data = "settings:pair:en_ru"
         mock_callback.message = mock_message
 
-        with patch("src.bot.handlers.start.AsyncSessionMaker") as mock_session_maker:
-            mock_session = AsyncMock()
-            mock_session_maker.return_value.__aenter__.return_value = mock_session
+        with patch("src.bot.handlers.start._build_menu_text", new_callable=AsyncMock) as mock_build:
+            mock_build.return_value = "Menu text"
 
-            with patch("src.bot.handlers.start.UserService") as mock_service_class:
-                mock_service = mock_service_class.return_value
-                mock_service.update = AsyncMock(return_value=db_user)
+            await on_pair_selected(mock_callback, mock_i18n, db_user)
 
-                with patch("src.bot.handlers.start._build_menu_text", new_callable=AsyncMock) as mock_build:
-                    mock_build.return_value = "Menu text"
-
-                    await on_pair_selected(mock_callback, mock_i18n, db_user)
-
-        mock_service.update.assert_called_once()
+        patched_start_user_service.update.assert_called_once()
         mock_message.edit_text.assert_called_once()
         mock_callback.answer.assert_called_once()
